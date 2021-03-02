@@ -1,19 +1,47 @@
 export type Config = {
     instaBaseUrl: string,
     initiateExitPath: string,
+    getSupportedTokensPath: string,
+    checkRequestStatusPath: string,
+    checkTransferStatusPath: string,
     liquidityPoolManagerABI: object[],
-    erc20TokenABI: object[]
+    erc20TokenABI: object[],
+    defaultSupportedTokens: Map<number,SupportedToken[]>,
+    supportedNetworkIds: number[],
+    defaultExitCheckInterval: number,
+    maxDepositCheckCallbackCount: number
 }
 
+export type CheckStatusRequest = {
+    tokenAddress: string,
+    amount: number,
+    fromChainId: number,
+    toChainId: number
+}
+
+export type CheckStatusResponse = {
+    code: number,
+    message: string
+}
+
+export type SupportedToken = {
+    tokenSymbol: string,
+    decimal: number,
+    fromChainToken: string
+}
 
 export type Options = {
     fromChainId : string,
     toChainId: string,
-    defaultAccount: string
+    defaultAccount: string,
+    debug: string,
+    infiniteApproval: boolean,
+    exitCheckInterval: number, // Interval in milli seconds to check for exit status
+    onFundsTransfered: (data: ExitResponse) => void
 }
 
 export type FetchOption = {
-    body: string,
+    body?: string,
     method: string,
     headers: any
 }
@@ -32,6 +60,23 @@ export type ExitRequest = {
     toChainId?: string
 }
 
+export type CheckDepositStatusRequest = {
+    depositHash: string,
+    fromChainId: number
+}
+
+export type ExitResponse = {
+    code: number,
+    message: string,
+    statusCode: number,
+    fromChainId: number,
+    toChainId: number,
+    amount: string,
+    tokenAddress: string,
+    depositHash: string,
+    exitHash: string
+}
+
 export type DepositRequest = {
     sender: string,
     receiver: string,
@@ -39,8 +84,7 @@ export type DepositRequest = {
     depositContractAddress: string,
     amount: string,
     fromChainId: string,
-    toChainId: string,
-    trackingId: string
+    toChainId: string
 }
 
 export type GenerateTransactionIdParams = {

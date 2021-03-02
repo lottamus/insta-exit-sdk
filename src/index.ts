@@ -1,5 +1,6 @@
 import { BigNumber, ethers } from "ethers";
-import { DepositRequest, ExitRequest, FetchOption, GenerateTransactionIdParams, Options, SignatureType } from "./types";
+import { EXIT_STATUS } from "./config";
+import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse, DepositRequest, ExitRequest, ExitResponse, FetchOption, GenerateTransactionIdParams, Options, SignatureType, SupportedToken } from "./types";
 
 const { config, RESPONSE_CODES } = require('./config');
 
@@ -20,10 +21,12 @@ const metaTransactionType = [
 class InstaExit {
     provider: any;
     options: Options;
+    supportedTokens: Map<number, SupportedToken[]>;
+    depositTransactionListenerMap: Map<string, any>;
 
     constructor(provider: any, options: Options) {
         this._validate(options);
-        if(ethers.providers.Provider.isProvider(provider)) {
+        if (ethers.providers.Provider.isProvider(provider)) {
             this._logMessage(`Ethers provider detected`);
             this.provider = provider;
         } else {
@@ -31,6 +34,17 @@ class InstaExit {
             this.provider = new ethers.providers.Web3Provider(provider);
         }
         this.options = options;
+        this.supportedTokens = new Map();
+        this.depositTransactionListenerMap = new Map();
+    }
+
+    init = async () => {
+        const networkIds = config.supportedNetworkIds;
+        for(let index = 0; index < networkIds.length; index++) {
+            const networkId = networkIds[index];
+            const supportedTokens = await this._getSupportedTokensFromServer(networkId);
+            this.supportedTokens.set(networkId, supportedTokens);
+        }
     }
 
     _validate = (options: Options) => {
@@ -45,108 +59,156 @@ class InstaExit {
         }
     }
 
+    getERC20TokenDecimals = (address: string) => {
+        const tokenContract = new ethers.Contract(address, config.erc20TokenABI, this.provider);
+        if(tokenContract) {
+            return tokenContract.decimals();
+        } else {
+            throw new Error("Unable to create token contract object. Please check your network and token address");
+        }
+    }
+
     getFetchOptions = (method: string) => {
         return {
             method,
-            body: "",
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
             }
         }
     }
 
-    generateTxId = (exitRequest: ExitRequest, signatureType: SignatureType) => {
-        const engine = this;
+    getSupportedTokens = (networkId: number): (SupportedToken[] | undefined) => {
+        return this.supportedTokens.get(networkId);
+    }
 
+    preDepositStatus = (checkStatusRequest: CheckStatusRequest) : Promise<CheckStatusResponse> => {
+        const self = this;
         return new Promise(async (resolve, reject) => {
-            let signature;
-
-            const message: ExitRequest = exitRequest;
-            if (!message.receiver) {
-                message.receiver = message.sender;
-            }
-
-            if(!message.fromChainId) {
-                message.fromChainId = this.options.fromChainId;
-            }
-
-            if(!message.toChainId) {
-                message.toChainId = this.options.toChainId;
-            }
-
-            console.log(message.sender);
-            console.log(message);
-            if (signatureType === SignatureType.PERSONAL_SIGN) {
-                signature = await engine.provider.send("personal_sign", [message.sender, JSON.stringify(message)]);
-                console.log(signature);
-                const recoveredAddress = await ethers.utils.verifyMessage(JSON.stringify(message), signature);
-                console.log(recoveredAddress);
-
-            } else if (signatureType === SignatureType.EIP712_SIGN) {
-                const domainData = {
-                    name: "InstaExit",
-                    version: "1",
-                };
-
-                const dataToSign = JSON.stringify({
-                    types: {
-                        EIP712Domain: domainType,
-                        MetaTransaction: metaTransactionType
-                    },
-                    domain: domainData,
-                    primaryType: "MetaTransaction",
-                    message
-                });
-
-                const signedMessage = await engine.provider.send("eth_signTypedData_v3", [message.sender, dataToSign]);
-                signature = signedMessage.result;
-                console.log(signature);
-            }
-            const fetchOptions: FetchOption = engine.getFetchOptions('POST');
+            const fetchOptions: FetchOption = this.getFetchOptions('POST');
             const body = {
-                data: message,
-                senderSignature: signature,
-                signatureType
+                tokenAddress: checkStatusRequest.tokenAddress,
+                amount: checkStatusRequest.amount,
+                fromChainId: checkStatusRequest.fromChainId,
+                toChainId: checkStatusRequest.toChainId
             };
             fetchOptions.body = JSON.stringify(body);
-            fetch(`${config.instaBaseUrl}${config.initiateExitPath}`, fetchOptions)
+            fetch(`${config.instaBaseUrl}${config.checkRequestStatusPath}`, fetchOptions)
                 .then(response => response.json())
                 .then((response) => {
-                    if (response) {
-                        console.log(response);
-                        resolve(response);
-                    } else {
-                        const error = engine.formatMessage(RESPONSE_CODES.ERROR_RESPONSE, `Unable to get generate id`);
-                        console.log(error);
-                        reject(error);
-                    }
+                    self._logMessage(response)
+                    resolve(response);
                 })
                 .catch((error) => {
-                    console.log(error);
+                    self._logMessage(error);
                     reject(error);
                 });
         });
     }
 
-    deposit = async (request: DepositRequest) : Promise<ethers.providers.TransactionResponse | undefined> => {
+    _getSupportedTokensFromServer = (networkId: number): Promise<SupportedToken[]> => {
+        const self = this;
+        return new Promise(async (resolve, reject) => {
+            const fetchOptions: FetchOption = this.getFetchOptions('GET');
+            fetch(`${config.instaBaseUrl}${config.getSupportedTokensPath}?networkId=${networkId}`, fetchOptions)
+                .then(response => response.json())
+                .then((response) => {
+                    if (response && response.SupportedPairList) {
+                        self._logMessage(response.SupportedPairList);
+                        resolve(response.SupportedPairList);
+                    } else {
+                        const error = self.formatMessage(RESPONSE_CODES.ERROR_RESPONSE, `Unable to get supported tokens`);
+                        self._logMessage(error);
+                        self._logMessage("Returning default list from config");
+                        resolve(config.defaultSupportedTokens);
+                    }
+                })
+                .catch((error) => {
+                    self._logMessage(error);
+                    self._logMessage("Returning default list from config");
+                    resolve(config.defaultSupportedTokens);
+                });
+        });
+    }
+
+    deposit = async (request: DepositRequest): Promise<ethers.providers.TransactionResponse | undefined> => {
         const tokenContract = new ethers.Contract(request.tokenAddress, config.erc20TokenABI, this.provider.getUncheckedSigner());
         const allowance = await tokenContract.allowance(request.sender, request.depositContractAddress);
-        if(BigNumber.from(request.amount).lt(allowance)) {
-            return this._depositTokensToLiquidityPoolManager(request);
+        this._logMessage(`Allowance given to LiquidityPoolManager is ${allowance}`);
+        if (BigNumber.from(request.amount).lt(allowance)) {
+            const depositTransaction = await this._depositTokensToLiquidityPoolManager(request);
+            this.listenForExitTransaction(depositTransaction, parseInt(request.fromChainId, 10));
+            return depositTransaction;
         } else {
-            this._logMessage(`Approval to Liquidity Pool Manager ${allowance} is less than exit amount requested ${request.amount}`);
-            const approveTransaction = await this.approveLiquidityPoolManager(tokenContract, request.depositContractAddress, request.amount);
-            if(approveTransaction) {
-                await approveTransaction.wait(1);
-                return await this._depositTokensToLiquidityPoolManager(request);
-            }
+            // this._logMessage(`Approval to Liquidity Pool Manager ${allowance} is less than exit amount requested ${request.amount}`);
+            // this._logMessage(`Initiating approve transaction to give approval to ${request.depositContractAddress}`);
+            // const approveTransaction = await this.approveLiquidityPoolManager(tokenContract, request.depositContractAddress, request.amount);
+            // if (approveTransaction) {
+            //     await approveTransaction.wait(1);
+            //     return await this._depositTokensToLiquidityPoolManager(request);
+            // }
+            return Promise.reject(this.formatMessage(RESPONSE_CODES.ALLOWANCE_NOT_GIVEN,`Not enough allowance given to Liquidity Pool Manager contract`));
         }
     }
 
-    approveLiquidityPoolManager = async (tokenContract: ethers.Contract, spender: string, amount: string):
-    Promise<ethers.providers.TransactionResponse | undefined> => {
-        if(tokenContract) {
-            if(spender && amount) {
+    listenForExitTransaction = async (transaction: ethers.providers.TransactionResponse, fromChainId: number) => {
+        if(this.options.onFundsTransfered) {
+            const interval = this.options.exitCheckInterval || config.defaultExitCheckInterval;
+            await transaction.wait(1);
+            this._logMessage(`Deposit transaction Confirmed. Listening for exit transaction now`);
+            let invocationCount = 0;
+            const intervalId = setInterval(async ()=>{
+                const depositHash = transaction.hash;
+                const response: any = await this.checkDepositStatus({depositHash, fromChainId});
+                invocationCount++;
+                if(response && response.code === RESPONSE_CODES.SUCCESS) {
+                    if(response.statusCode === EXIT_STATUS.PROCESSED && response.exitHash) {
+                        this.options.onFundsTransfered(response);
+                        clearInterval(this.depositTransactionListenerMap.get(depositHash))
+                        this.depositTransactionListenerMap.delete(depositHash);
+                    }
+                }
+                if(invocationCount >= config.maxDepositCheckCallbackCount) {
+                    this._logMessage(`Max callback count reached ${config.maxDepositCheckCallbackCount}. Clearing interval now`);
+                    clearInterval(this.depositTransactionListenerMap.get(depositHash))
+                    this.depositTransactionListenerMap.delete(depositHash);
+                }
+            }, interval);
+            this.depositTransactionListenerMap.set(transaction.hash, intervalId);
+        } else {
+            this._logMessage(`onFundsTransfered method is missing from options so not listening for exit transaction`);
+        }
+    }
+
+    checkDepositStatus = (depositRequest: CheckDepositStatusRequest) => {
+        const self = this;
+        return new Promise(async (resolve, reject) => {
+            if(depositRequest && depositRequest.depositHash && depositRequest.fromChainId) {
+                const fetchOptions: FetchOption = this.getFetchOptions('GET');
+                const getURL = `${config.instaBaseUrl}${config.checkTransferStatusPath}?depositHash=${depositRequest.depositHash}&fromChainId=${depositRequest.fromChainId}`;
+                fetch(getURL, fetchOptions)
+                    .then(response => response.json())
+                    .then((response) => {
+                        self._logMessage(response)
+                        resolve(response);
+                    })
+                    .catch((error) => {
+                        self._logMessage(error);
+                        reject(error);
+                    });
+            } else {
+                reject(this.formatMessage(RESPONSE_CODES.BAD_REQUEST ,"Bad input params. depositHash and fromChainId are mandatory parameters"));
+            }
+        });
+    }
+
+    approveERC20 = async (tokenAddress: string, spender: string, amount: string):
+        Promise<ethers.providers.TransactionResponse | undefined> => {
+        const tokenContract = new ethers.Contract(tokenAddress, config.erc20TokenABI, this.provider.getUncheckedSigner());
+        if (tokenContract) {
+            if(this.options.infiniteApproval) {
+                amount = ethers.constants.MaxUint256.toString();
+            }
+            if (spender && amount) {
                 return await tokenContract.approve(spender, amount);
             } else {
                 this._logMessage(`One of the inputs is not valid => spender: ${spender}, amount: ${amount}`)
@@ -160,7 +222,7 @@ class InstaExit {
     _depositTokensToLiquidityPoolManager = async (request: DepositRequest) => {
         const liquidityPoolManager = new ethers.Contract(request.depositContractAddress,
             config.liquidityPoolManagerABI, this.provider.getUncheckedSigner());
-        const transaction = await liquidityPoolManager.depositErc20(request.tokenAddress, request.receiver, request.amount, request.trackingId);
+        const transaction = await liquidityPoolManager.depositErc20(request.tokenAddress, request.receiver, request.amount, request.toChainId);
         return transaction;
     }
 
@@ -172,9 +234,10 @@ class InstaExit {
         };
     }
 
-    _logMessage = (message: string) => {
-        console.log(message);
+    _logMessage = (message: object|string) => {
+        if(this.options && this.options.debug)
+            console.log(message);
     }
 }
 
-module.exports = { InstaExit, SignatureType }
+module.exports = { InstaExit, SignatureType, RESPONSE_CODES }
