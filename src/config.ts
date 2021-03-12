@@ -7,17 +7,17 @@ defaultSupportedTokens.set(80001, [
 	{
 		"tokenSymbol": "USDT",
 		"decimal": 18,
-		"fromChainToken": "0xeaBc4b91d9375796AA4F69cC764A4aB509080A58"
+		"address": "0xeaBc4b91d9375796AA4F69cC764A4aB509080A58"
 	},
 	{
 		"tokenSymbol": "USDC",
 		"decimal": 6,
-		"fromChainToken": "0xdA5289fCAAF71d52a80A254da614a192b693e977"
+		"address": "0xdA5289fCAAF71d52a80A254da614a192b693e977"
 	},
 	{
 		"tokenSymbol": "DAI",
 		"decimal": 18,
-		"fromChainToken": "0x27a44456bEDb94DbD59D0f0A14fE977c777fC5C3"
+		"address": "0x27a44456bEDb94DbD59D0f0A14fE977c777fC5C3"
 	}
 ]);
 

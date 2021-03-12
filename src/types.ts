@@ -27,7 +27,7 @@ export type CheckStatusResponse = {
 export type SupportedToken = {
     tokenSymbol: string,
     decimal: number,
-    fromChainToken: string
+    address: string
 }
 
 export type Options = {

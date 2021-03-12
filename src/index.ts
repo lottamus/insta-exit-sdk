@@ -119,13 +119,13 @@ class InstaExit {
                         const error = self.formatMessage(RESPONSE_CODES.ERROR_RESPONSE, `Unable to get supported tokens`);
                         self._logMessage(error);
                         self._logMessage("Returning default list from config");
-                        resolve(config.defaultSupportedTokens);
+                        resolve(config.defaultSupportedTokens.get(networkId));
                     }
                 })
                 .catch((error) => {
                     self._logMessage(error);
                     self._logMessage("Returning default list from config");
-                    resolve(config.defaultSupportedTokens);
+                    resolve(config.defaultSupportedTokens.get(networkId));
                 });
         });
     }
