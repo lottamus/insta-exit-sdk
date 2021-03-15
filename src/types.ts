@@ -4,6 +4,7 @@ export type Config = {
     getSupportedTokensPath: string,
     checkRequestStatusPath: string,
     checkTransferStatusPath: string,
+    getPoolInfoPath: string,
     liquidityPoolManagerABI: object[],
     erc20TokenABI: object[],
     defaultSupportedTokens: Map<number,SupportedToken[]>,

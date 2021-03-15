@@ -201,6 +201,28 @@ class InstaExit {
         });
     }
 
+    getPoolInformation = (tokenAddress: string, fromChainId: number, toChainId: number) => {
+        const self = this;
+        return new Promise(async (resolve, reject) => {
+            if(tokenAddress && fromChainId !== undefined && toChainId !== undefined) {
+                const fetchOptions: FetchOption = this.getFetchOptions('GET');
+                const getURL = `${config.instaBaseUrl}${config.getPoolInfoPath}?tokenAddress=${tokenAddress}&fromChainId=${fromChainId}&toChainId=${toChainId}`;
+                fetch(getURL, fetchOptions)
+                    .then(response => response.json())
+                    .then((response) => {
+                        self._logMessage(response)
+                        resolve(response);
+                    })
+                    .catch((error) => {
+                        self._logMessage(error);
+                        reject(error);
+                    });
+            } else {
+                reject(this.formatMessage(RESPONSE_CODES.BAD_REQUEST ,"Bad input params. fromChainId, toChainId and tokenAddress are mandatory parameters"));
+            }
+        });
+    }
+
     approveERC20 = async (tokenAddress: string, spender: string, amount: string):
         Promise<ethers.providers.TransactionResponse | undefined> => {
         const tokenContract = new ethers.Contract(tokenAddress, config.erc20TokenABI, this.provider.getUncheckedSigner());
