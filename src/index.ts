@@ -92,7 +92,7 @@ class InstaExit {
                 toChainId: checkStatusRequest.toChainId
             };
             fetchOptions.body = JSON.stringify(body);
-            fetch(`${config.instaBaseUrl}${config.checkRequestStatusPath}`, fetchOptions)
+            fetch(`${self._getInstaExitBaseURL()}${config.checkRequestStatusPath}`, fetchOptions)
                 .then(response => response.json())
                 .then((response) => {
                     self._logMessage(response)
@@ -109,7 +109,7 @@ class InstaExit {
         const self = this;
         return new Promise(async (resolve, reject) => {
             const fetchOptions: FetchOption = this.getFetchOptions('GET');
-            fetch(`${config.instaBaseUrl}${config.getSupportedTokensPath}?networkId=${networkId}`, fetchOptions)
+            fetch(`${self._getInstaExitBaseURL()}${config.getSupportedTokensPath}?networkId=${networkId}`, fetchOptions)
                 .then(response => response.json())
                 .then((response) => {
                     if (response && response.SupportedPairList) {
@@ -184,7 +184,7 @@ class InstaExit {
         return new Promise(async (resolve, reject) => {
             if(depositRequest && depositRequest.depositHash && depositRequest.fromChainId) {
                 const fetchOptions: FetchOption = this.getFetchOptions('GET');
-                const getURL = `${config.instaBaseUrl}${config.checkTransferStatusPath}?depositHash=${depositRequest.depositHash}&fromChainId=${depositRequest.fromChainId}`;
+                const getURL = `${self._getInstaExitBaseURL()}${config.checkTransferStatusPath}?depositHash=${depositRequest.depositHash}&fromChainId=${depositRequest.fromChainId}`;
                 fetch(getURL, fetchOptions)
                     .then(response => response.json())
                     .then((response) => {
@@ -206,7 +206,7 @@ class InstaExit {
         return new Promise(async (resolve, reject) => {
             if(tokenAddress && fromChainId !== undefined && toChainId !== undefined) {
                 const fetchOptions: FetchOption = this.getFetchOptions('GET');
-                const getURL = `${config.instaBaseUrl}${config.getPoolInfoPath}?tokenAddress=${tokenAddress}&fromChainId=${fromChainId}&toChainId=${toChainId}`;
+                const getURL = `${self._getInstaExitBaseURL()}${config.getPoolInfoPath}?tokenAddress=${tokenAddress}&fromChainId=${fromChainId}&toChainId=${toChainId}`;
                 fetch(getURL, fetchOptions)
                     .then(response => response.json())
                     .then((response) => {
@@ -248,6 +248,10 @@ class InstaExit {
         return transaction;
     }
 
+    _getInstaExitBaseURL = () => {
+        const environment = this.options.environment || "prod";
+        return config.instaBaseUrl[environment];
+    }
 
     formatMessage = (code: number, message: string) => {
         return {

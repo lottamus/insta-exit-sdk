@@ -41,7 +41,11 @@ defaultSupportedTokens.set(5, [
 ]);
 
 const config: Config = {
-	instaBaseUrl: "http://localhost:3000/api/v1",
+	instaBaseUrl: {
+		"test" : "https://test-api.insta-exit.com/api/v1",
+		"staging" : "https://staging-api.insta-exit.com/api/v1",
+		"prod" : "https://api.insta-exit.com/api/v1"
+	},
 	initiateExitPath: "/insta-exit/initiate-exit",
 	getSupportedTokensPath: "/admin/supported-token/list",
 	checkRequestStatusPath: "/insta-exit/system-status",

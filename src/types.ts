@@ -1,5 +1,5 @@
 export type Config = {
-    instaBaseUrl: string,
+    instaBaseUrl: object,
     initiateExitPath: string,
     getSupportedTokensPath: string,
     checkRequestStatusPath: string,
@@ -35,7 +35,8 @@ export type Options = {
     fromChainId : string,
     toChainId: string,
     defaultAccount: string,
-    debug: string,
+    debug: boolean,
+    environment: string,
     infiniteApproval: boolean,
     exitCheckInterval: number, // Interval in milli seconds to check for exit status
     onFundsTransfered: (data: ExitResponse) => void
