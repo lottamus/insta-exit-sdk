@@ -1,22 +1,9 @@
 import { BigNumber, ethers } from "ethers";
 import { EXIT_STATUS } from "./config";
-import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse, DepositRequest, ExitRequest, ExitResponse, FetchOption, GenerateTransactionIdParams, Options, SignatureType, SupportedToken } from "./types";
+import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse, 
+    DepositRequest, FetchOption, Options, SignatureType, SupportedToken } from "./types";
 
 const { config, RESPONSE_CODES } = require('./config');
-
-const domainType = [
-    { name: "name", type: "string" },
-    { name: "version", type: "string" },
-];
-
-const metaTransactionType = [
-    { name: "sender", type: "address" },
-    { name: "receiver", type: "address" },
-    { name: "tokenAddress", type: "address" },
-    { name: "amount", type: "string" },
-    { name: "fromChainId", type: "string" },
-    { name: "toChainId", type: "string" }
-];
 
 class InstaExit {
     provider: any;
@@ -134,18 +121,11 @@ class InstaExit {
         const tokenContract = new ethers.Contract(request.tokenAddress, config.erc20TokenABI, this.provider.getUncheckedSigner());
         const allowance = await tokenContract.allowance(request.sender, request.depositContractAddress);
         this._logMessage(`Allowance given to LiquidityPoolManager is ${allowance}`);
-        if (BigNumber.from(request.amount).lt(allowance)) {
+        if (BigNumber.from(request.amount).lte(allowance)) {
             const depositTransaction = await this._depositTokensToLiquidityPoolManager(request);
             this.listenForExitTransaction(depositTransaction, parseInt(request.fromChainId, 10));
             return depositTransaction;
         } else {
-            // this._logMessage(`Approval to Liquidity Pool Manager ${allowance} is less than exit amount requested ${request.amount}`);
-            // this._logMessage(`Initiating approve transaction to give approval to ${request.depositContractAddress}`);
-            // const approveTransaction = await this.approveLiquidityPoolManager(tokenContract, request.depositContractAddress, request.amount);
-            // if (approveTransaction) {
-            //     await approveTransaction.wait(1);
-            //     return await this._depositTokensToLiquidityPoolManager(request);
-            // }
             return Promise.reject(this.formatMessage(RESPONSE_CODES.ALLOWANCE_NOT_GIVEN,`Not enough allowance given to Liquidity Pool Manager contract`));
         }
     }
@@ -229,6 +209,7 @@ class InstaExit {
         if (tokenContract) {
             if(this.options.infiniteApproval) {
                 amount = ethers.constants.MaxUint256.toString();
+                this._logMessage(`Infinite approval flag is true, so overwriting the amount with value ${amount}`);
             }
             if (spender && amount) {
                 return await tokenContract.approve(spender, amount);
@@ -237,7 +218,7 @@ class InstaExit {
             }
         } else {
             this._logMessage("Token contract is not defined");
-            throw new Error("Token contract is not defined");
+            throw new Error("Token contract is not defined. Please check if token address is present on the current chain");
         }
     }
 
