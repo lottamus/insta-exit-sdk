@@ -1,6 +1,6 @@
 import { BigNumber, ethers } from "ethers";
 import { EXIT_STATUS } from "./config";
-import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse, 
+import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse,
     DepositRequest, FetchOption, Options, SignatureType, SupportedToken } from "./types";
 
 const { config, RESPONSE_CODES } = require('./config');
