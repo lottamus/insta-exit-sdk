@@ -48,11 +48,6 @@ export type FetchOption = {
     headers: any
 }
 
-export enum SignatureType {
-    PERSONAL_SIGN,
-    EIP712_SIGN
-}
-
 export type ExitRequest = {
     sender: string,
     receiver: string,
@@ -87,9 +82,4 @@ export type DepositRequest = {
     amount: string,
     fromChainId: string,
     toChainId: string
-}
-
-export type GenerateTransactionIdParams = {
-    data: ExitRequest,
-    signatureType: SignatureType
 }

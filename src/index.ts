@@ -1,7 +1,7 @@
 import { BigNumber, ethers } from "ethers";
 import { EXIT_STATUS } from "./config";
 import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse,
-    DepositRequest, FetchOption, Options, SignatureType, SupportedToken } from "./types";
+    DepositRequest, FetchOption, Options, SupportedToken } from "./types";
 
 const { config, RESPONSE_CODES } = require('./config');
 
@@ -247,4 +247,4 @@ class InstaExit {
     }
 }
 
-module.exports = { InstaExit, SignatureType, RESPONSE_CODES }
+module.exports = { InstaExit, RESPONSE_CODES }
