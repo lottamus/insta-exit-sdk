@@ -1,22 +1,9 @@
 import { BigNumber, ethers } from "ethers";
 import { EXIT_STATUS } from "./config";
-import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse, DepositRequest, ExitRequest, ExitResponse, FetchOption, GenerateTransactionIdParams, Options, SignatureType, SupportedToken } from "./types";
+import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse,
+    DepositRequest, FetchOption, Options, SupportedToken } from "./types";
 
 const { config, RESPONSE_CODES } = require('./config');
-
-const domainType = [
-    { name: "name", type: "string" },
-    { name: "version", type: "string" },
-];
-
-const metaTransactionType = [
-    { name: "sender", type: "address" },
-    { name: "receiver", type: "address" },
-    { name: "tokenAddress", type: "address" },
-    { name: "amount", type: "string" },
-    { name: "fromChainId", type: "string" },
-    { name: "toChainId", type: "string" }
-];
 
 class InstaExit {
     provider: any;
@@ -26,6 +13,7 @@ class InstaExit {
 
     constructor(provider: any, options: Options) {
         this._validate(options);
+        this.options = options;
         if (ethers.providers.Provider.isProvider(provider)) {
             this._logMessage(`Ethers provider detected`);
             this.provider = provider;
@@ -33,7 +21,6 @@ class InstaExit {
             this._logMessage(`Non-Ethers provider detected`);
             this.provider = new ethers.providers.Web3Provider(provider);
         }
-        this.options = options;
         this.supportedTokens = new Map();
         this.depositTransactionListenerMap = new Map();
     }
@@ -92,7 +79,7 @@ class InstaExit {
                 toChainId: checkStatusRequest.toChainId
             };
             fetchOptions.body = JSON.stringify(body);
-            fetch(`${config.instaBaseUrl}${config.checkRequestStatusPath}`, fetchOptions)
+            fetch(`${self._getInstaExitBaseURL()}${config.checkRequestStatusPath}`, fetchOptions)
                 .then(response => response.json())
                 .then((response) => {
                     self._logMessage(response)
@@ -109,7 +96,7 @@ class InstaExit {
         const self = this;
         return new Promise(async (resolve, reject) => {
             const fetchOptions: FetchOption = this.getFetchOptions('GET');
-            fetch(`${config.instaBaseUrl}${config.getSupportedTokensPath}?networkId=${networkId}`, fetchOptions)
+            fetch(`${self._getInstaExitBaseURL()}${config.getSupportedTokensPath}?networkId=${networkId}`, fetchOptions)
                 .then(response => response.json())
                 .then((response) => {
                     if (response && response.SupportedPairList) {
@@ -134,18 +121,11 @@ class InstaExit {
         const tokenContract = new ethers.Contract(request.tokenAddress, config.erc20TokenABI, this.provider.getUncheckedSigner());
         const allowance = await tokenContract.allowance(request.sender, request.depositContractAddress);
         this._logMessage(`Allowance given to LiquidityPoolManager is ${allowance}`);
-        if (BigNumber.from(request.amount).lt(allowance)) {
+        if (BigNumber.from(request.amount).lte(allowance)) {
             const depositTransaction = await this._depositTokensToLiquidityPoolManager(request);
             this.listenForExitTransaction(depositTransaction, parseInt(request.fromChainId, 10));
             return depositTransaction;
         } else {
-            // this._logMessage(`Approval to Liquidity Pool Manager ${allowance} is less than exit amount requested ${request.amount}`);
-            // this._logMessage(`Initiating approve transaction to give approval to ${request.depositContractAddress}`);
-            // const approveTransaction = await this.approveLiquidityPoolManager(tokenContract, request.depositContractAddress, request.amount);
-            // if (approveTransaction) {
-            //     await approveTransaction.wait(1);
-            //     return await this._depositTokensToLiquidityPoolManager(request);
-            // }
             return Promise.reject(this.formatMessage(RESPONSE_CODES.ALLOWANCE_NOT_GIVEN,`Not enough allowance given to Liquidity Pool Manager contract`));
         }
     }
@@ -184,7 +164,7 @@ class InstaExit {
         return new Promise(async (resolve, reject) => {
             if(depositRequest && depositRequest.depositHash && depositRequest.fromChainId) {
                 const fetchOptions: FetchOption = this.getFetchOptions('GET');
-                const getURL = `${config.instaBaseUrl}${config.checkTransferStatusPath}?depositHash=${depositRequest.depositHash}&fromChainId=${depositRequest.fromChainId}`;
+                const getURL = `${self._getInstaExitBaseURL()}${config.checkTransferStatusPath}?depositHash=${depositRequest.depositHash}&fromChainId=${depositRequest.fromChainId}`;
                 fetch(getURL, fetchOptions)
                     .then(response => response.json())
                     .then((response) => {
@@ -201,12 +181,35 @@ class InstaExit {
         });
     }
 
+    getPoolInformation = (tokenAddress: string, fromChainId: number, toChainId: number) => {
+        const self = this;
+        return new Promise(async (resolve, reject) => {
+            if(tokenAddress && fromChainId !== undefined && toChainId !== undefined) {
+                const fetchOptions: FetchOption = this.getFetchOptions('GET');
+                const getURL = `${self._getInstaExitBaseURL()}${config.getPoolInfoPath}?tokenAddress=${tokenAddress}&fromChainId=${fromChainId}&toChainId=${toChainId}`;
+                fetch(getURL, fetchOptions)
+                    .then(response => response.json())
+                    .then((response) => {
+                        self._logMessage(response)
+                        resolve(response);
+                    })
+                    .catch((error) => {
+                        self._logMessage(error);
+                        reject(error);
+                    });
+            } else {
+                reject(this.formatMessage(RESPONSE_CODES.BAD_REQUEST ,"Bad input params. fromChainId, toChainId and tokenAddress are mandatory parameters"));
+            }
+        });
+    }
+
     approveERC20 = async (tokenAddress: string, spender: string, amount: string):
         Promise<ethers.providers.TransactionResponse | undefined> => {
         const tokenContract = new ethers.Contract(tokenAddress, config.erc20TokenABI, this.provider.getUncheckedSigner());
         if (tokenContract) {
             if(this.options.infiniteApproval) {
                 amount = ethers.constants.MaxUint256.toString();
+                this._logMessage(`Infinite approval flag is true, so overwriting the amount with value ${amount}`);
             }
             if (spender && amount) {
                 return await tokenContract.approve(spender, amount);
@@ -215,7 +218,7 @@ class InstaExit {
             }
         } else {
             this._logMessage("Token contract is not defined");
-            throw new Error("Token contract is not defined");
+            throw new Error("Token contract is not defined. Please check if token address is present on the current chain");
         }
     }
 
@@ -226,6 +229,10 @@ class InstaExit {
         return transaction;
     }
 
+    _getInstaExitBaseURL = () => {
+        const environment = this.options.environment || "prod";
+        return config.instaBaseUrl[environment];
+    }
 
     formatMessage = (code: number, message: string) => {
         return {
@@ -240,4 +247,4 @@ class InstaExit {
     }
 }
 
-module.exports = { InstaExit, SignatureType, RESPONSE_CODES }
+module.exports = { InstaExit, RESPONSE_CODES }

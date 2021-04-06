@@ -1,9 +1,10 @@
 export type Config = {
-    instaBaseUrl: string,
+    instaBaseUrl: object,
     initiateExitPath: string,
     getSupportedTokensPath: string,
     checkRequestStatusPath: string,
     checkTransferStatusPath: string,
+    getPoolInfoPath: string,
     liquidityPoolManagerABI: object[],
     erc20TokenABI: object[],
     defaultSupportedTokens: Map<number,SupportedToken[]>,
@@ -34,7 +35,8 @@ export type Options = {
     fromChainId : string,
     toChainId: string,
     defaultAccount: string,
-    debug: string,
+    debug: boolean,
+    environment: string,
     infiniteApproval: boolean,
     exitCheckInterval: number, // Interval in milli seconds to check for exit status
     onFundsTransfered: (data: ExitResponse) => void
@@ -44,11 +46,6 @@ export type FetchOption = {
     body?: string,
     method: string,
     headers: any
-}
-
-export enum SignatureType {
-    PERSONAL_SIGN,
-    EIP712_SIGN
 }
 
 export type ExitRequest = {
@@ -85,9 +82,4 @@ export type DepositRequest = {
     amount: string,
     fromChainId: string,
     toChainId: string
-}
-
-export type GenerateTransactionIdParams = {
-    data: ExitRequest,
-    signatureType: SignatureType
 }
