@@ -26,6 +26,7 @@ class InstaExit {
 
     constructor(provider: any, options: Options) {
         this._validate(options);
+        this.options = options;
         if (ethers.providers.Provider.isProvider(provider)) {
             this._logMessage(`Ethers provider detected`);
             this.provider = provider;
@@ -33,7 +34,6 @@ class InstaExit {
             this._logMessage(`Non-Ethers provider detected`);
             this.provider = new ethers.providers.Web3Provider(provider);
         }
-        this.options = options;
         this.supportedTokens = new Map();
         this.depositTransactionListenerMap = new Map();
     }
