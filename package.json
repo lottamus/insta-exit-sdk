@@ -1,6 +1,6 @@
 {
   "name": "@biconomy/inex",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "InstaExit SDK to enable instant and seamless cross-chain deposits & withdrawals",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
