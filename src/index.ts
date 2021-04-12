@@ -36,13 +36,7 @@ class InstaExit {
 
     _validate = (options: Options) => {
         if (!options) {
-            throw new Error(`Options object needs to be passed to InstaExit Object with fromChainId & toChainId as mandatory key`);
-        }
-        if (!options.fromChainId) {
-            throw new Error(`fromChainId is required in options object when creating InstaExit object`);
-        }
-        if (!options.toChainId) {
-            throw new Error(`toChainId is required in options object when creating InstaExit object`);
+            throw new Error(`Options object needs to be passed to InstaExit Object`);
         }
     }
 
@@ -76,7 +70,8 @@ class InstaExit {
                 tokenAddress: checkStatusRequest.tokenAddress,
                 amount: checkStatusRequest.amount,
                 fromChainId: checkStatusRequest.fromChainId,
-                toChainId: checkStatusRequest.toChainId
+                toChainId: checkStatusRequest.toChainId,
+                userAddress: checkStatusRequest.userAddress
             };
             fetchOptions.body = JSON.stringify(body);
             fetch(`${self._getInstaExitBaseURL()}${config.checkRequestStatusPath}`, fetchOptions)
