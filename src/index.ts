@@ -5,7 +5,7 @@ import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse,
 
 const { config, RESPONSE_CODES } = require('./config');
 
-class InstaExit {
+class Hyphen {
     provider: any;
     options: Options;
     supportedTokens: Map<number, SupportedToken[]>;
@@ -36,7 +36,7 @@ class InstaExit {
 
     _validate = (options: Options) => {
         if (!options) {
-            throw new Error(`Options object needs to be passed to InstaExit Object`);
+            throw new Error(`Options object needs to be passed to Hyphen Object`);
         }
     }
 
@@ -74,7 +74,7 @@ class InstaExit {
                 userAddress: checkStatusRequest.userAddress
             };
             fetchOptions.body = JSON.stringify(body);
-            fetch(`${self._getInstaExitBaseURL()}${config.checkRequestStatusPath}`, fetchOptions)
+            fetch(`${self._getHyphenBaseURL()}${config.checkRequestStatusPath}`, fetchOptions)
                 .then(response => response.json())
                 .then((response) => {
                     self._logMessage(response)
@@ -91,12 +91,12 @@ class InstaExit {
         const self = this;
         return new Promise(async (resolve, reject) => {
             const fetchOptions: FetchOption = this.getFetchOptions('GET');
-            fetch(`${self._getInstaExitBaseURL()}${config.getSupportedTokensPath}?networkId=${networkId}`, fetchOptions)
+            fetch(`${self._getHyphenBaseURL()}${config.getSupportedTokensPath}?networkId=${networkId}`, fetchOptions)
                 .then(response => response.json())
                 .then((response) => {
-                    if (response && response.SupportedPairList) {
-                        self._logMessage(response.SupportedPairList);
-                        resolve(response.SupportedPairList);
+                    if (response && response.supportedPairList) {
+                        self._logMessage(response.supportedPairList);
+                        resolve(response.supportedPairList);
                     } else {
                         const error = self.formatMessage(RESPONSE_CODES.ERROR_RESPONSE, `Unable to get supported tokens`);
                         self._logMessage(error);
@@ -159,7 +159,7 @@ class InstaExit {
         return new Promise(async (resolve, reject) => {
             if(depositRequest && depositRequest.depositHash && depositRequest.fromChainId) {
                 const fetchOptions: FetchOption = this.getFetchOptions('GET');
-                const getURL = `${self._getInstaExitBaseURL()}${config.checkTransferStatusPath}?depositHash=${depositRequest.depositHash}&fromChainId=${depositRequest.fromChainId}`;
+                const getURL = `${self._getHyphenBaseURL()}${config.checkTransferStatusPath}?depositHash=${depositRequest.depositHash}&fromChainId=${depositRequest.fromChainId}`;
                 fetch(getURL, fetchOptions)
                     .then(response => response.json())
                     .then((response) => {
@@ -181,7 +181,7 @@ class InstaExit {
         return new Promise(async (resolve, reject) => {
             if(tokenAddress && fromChainId !== undefined && toChainId !== undefined) {
                 const fetchOptions: FetchOption = this.getFetchOptions('GET');
-                const getURL = `${self._getInstaExitBaseURL()}${config.getPoolInfoPath}?tokenAddress=${tokenAddress}&fromChainId=${fromChainId}&toChainId=${toChainId}`;
+                const getURL = `${self._getHyphenBaseURL()}${config.getPoolInfoPath}?tokenAddress=${tokenAddress}&fromChainId=${fromChainId}&toChainId=${toChainId}`;
                 fetch(getURL, fetchOptions)
                     .then(response => response.json())
                     .then((response) => {
@@ -224,9 +224,9 @@ class InstaExit {
         return transaction;
     }
 
-    _getInstaExitBaseURL = () => {
+    _getHyphenBaseURL = () => {
         const environment = this.options.environment || "prod";
-        return config.instaBaseUrl[environment];
+        return config.hyphenBaseUrl[environment];
     }
 
     formatMessage = (code: number, message: string) => {
@@ -242,4 +242,4 @@ class InstaExit {
     }
 }
 
-module.exports = { InstaExit, RESPONSE_CODES }
+module.exports = { Hyphen, RESPONSE_CODES }

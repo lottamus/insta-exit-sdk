@@ -41,10 +41,10 @@ defaultSupportedTokens.set(5, [
 ]);
 
 const config: Config = {
-	instaBaseUrl: {
-		"test" : "https://test-api.insta-exit.com/api/v1",
-		"staging" : "https://staging-api.insta-exit.com/api/v1",
-		"prod" : "https://api.insta-exit.com/api/v1"
+	hyphenBaseUrl: {
+		"test" : "https://hyphen-test-api.biconomy.io/api/v1",
+		"staging" : "https://hyphen-staging-api.biconomy.io/api/v1",
+		"prod" : "https://hyphen-api.biconomy.io/api/v1"
 	},
 	initiateExitPath: "/insta-exit/initiate-exit",
 	getSupportedTokensPath: "/admin/supported-token/list",

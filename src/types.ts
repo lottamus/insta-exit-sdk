@@ -1,5 +1,5 @@
 export type Config = {
-    instaBaseUrl: object,
+    hyphenBaseUrl: object,
     initiateExitPath: string,
     getSupportedTokensPath: string,
     checkRequestStatusPath: string,
