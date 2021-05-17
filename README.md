@@ -1,11 +1,11 @@
 ---
 description: >-
- # insta-exit-sdk
-SDK to interact with Biconomy instaExit backend. It will provide a seamless process to integrate Insta-exit in any dapp or project
+ # hyphen-sdk
+SDK to interact with Biconomy Hyphen backend. It will provide a seamless process to integrate Hyphen in any dapp or project
 
 ---
 
-# Insta-Exit SDK \(INEX\)
+# Hyphen SDK \(Hyphen\)
 
 ## Introduction
 

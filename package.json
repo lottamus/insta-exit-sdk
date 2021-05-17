@@ -1,7 +1,7 @@
 {
-  "name": "@biconomy/inex",
-  "version": "0.0.1",
-  "description": "InstaExit SDK to enable instant and seamless cross-chain deposits & withdrawals",
+  "name": "@biconomy/hyphen",
+  "version": "0.0.2",
+  "description": "Hyphen SDK to enable instant and seamless cross-chain deposits & withdrawals",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

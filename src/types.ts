@@ -1,5 +1,5 @@
 export type Config = {
-    instaBaseUrl: object,
+    hyphenBaseUrl: object,
     initiateExitPath: string,
     getSupportedTokensPath: string,
     checkRequestStatusPath: string,
@@ -17,7 +17,8 @@ export type CheckStatusRequest = {
     tokenAddress: string,
     amount: number,
     fromChainId: number,
-    toChainId: number
+    toChainId: number,
+    userAddress: string
 }
 
 export type CheckStatusResponse = {
@@ -32,8 +33,6 @@ export type SupportedToken = {
 }
 
 export type Options = {
-    fromChainId : string,
-    toChainId: string,
     defaultAccount: string,
     debug: boolean,
     environment: string,
