@@ -38,7 +38,13 @@ export type Options = {
     environment: string,
     infiniteApproval: boolean,
     exitCheckInterval: number, // Interval in milli seconds to check for exit status
-    onFundsTransfered: (data: ExitResponse) => void
+    onFundsTransfered: (data: ExitResponse) => void,
+    biconomy: BiconomyOption 
+}
+
+export type BiconomyOption = {
+    enable: boolean,
+    apiKey: string
 }
 
 export type FetchOption = {

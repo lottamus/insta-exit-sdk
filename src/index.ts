@@ -7,6 +7,7 @@ const { config, RESPONSE_CODES } = require('./config');
 
 class Hyphen {
     provider: any;
+    biconomy: any;
     options: Options;
     supportedTokens: Map<number, SupportedToken[]>;
     depositTransactionListenerMap: Map<string, any>;
@@ -21,11 +22,34 @@ class Hyphen {
             this._logMessage(`Non-Ethers provider detected`);
             this.provider = new ethers.providers.Web3Provider(provider);
         }
+        if(this.options.biconomy && this.options.biconomy.enable){
+            this.biconomy = new Biconomy(this.provider, {apikey: this.options.biconomy.apiKey});
+            this.provider = this.biconomy;
+        }
         this.supportedTokens = new Map();
         this.depositTransactionListenerMap = new Map();
     }
 
-    init = async () => {
+    init = () => {
+        let self = this;
+        return new Promise(async (resolve, reject) => {
+            if(self.options.biconomy && self.options.biconomy.enable 
+                && self.biconomy.status != self.biconomy.READY){
+                self.biconomy.onEvent(self.biconomy.READY, async () => {
+                    await self._init();
+                    resolve();
+                }).onEvent(self.biconomy.ERROR, () => {
+                    self._logMessage("");
+                    reject();
+                })
+            } else {
+                await self._init();
+                resolve();
+            }
+        });
+    }
+
+    _init = async () => {
         const networkIds = config.supportedNetworkIds;
         for(let index = 0; index < networkIds.length; index++) {
             const networkId = networkIds[index];
@@ -33,7 +57,6 @@ class Hyphen {
             this.supportedTokens.set(networkId, supportedTokens);
         }
     }
-
     _validate = (options: Options) => {
         if (!options) {
             throw new Error(`Options object needs to be passed to Hyphen Object`);
@@ -207,7 +230,13 @@ class Hyphen {
                 this._logMessage(`Infinite approval flag is true, so overwriting the amount with value ${amount}`);
             }
             if (spender && amount) {
-                return await tokenContract.approve(spender, amount);
+                // check if biconomy enable?
+                if(this.options.biconomy && this.options.biconomy.enable){
+                    return await tokenContract.approve(spender, amount);
+                }else{
+                    return await tokenContract.approve(spender, amount);
+                }
+                
             } else {
                 this._logMessage(`One of the inputs is not valid => spender: ${spender}, amount: ${amount}`)
             }
