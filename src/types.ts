@@ -106,3 +106,9 @@ export type ERC20ApproveRequest = {
     address: string,
     salt: string
 }
+
+export type ManualExitResponse = {
+    code: number,
+    message: string,
+    exitHash: string
+}

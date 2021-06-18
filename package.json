@@ -1,6 +1,6 @@
 {
   "name": "@biconomy/hyphen",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Hyphen SDK to enable instant and seamless cross-chain deposits & withdrawals",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -28,6 +28,7 @@
   "homepage": "https://github.com/bcnmy/Insta-exits#readme",
   "files": [
     "*.js",
+    "/dist/meta-transaction/*.js",
     "/dist/*.js"
   ],
   "dependencies": {

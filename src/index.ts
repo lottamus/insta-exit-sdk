@@ -1,7 +1,7 @@
 import { BigNumber, ethers } from "ethers";
 import { EXIT_STATUS } from "./config";
 import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse,
-    DepositRequest, FetchOption, Options, SupportedToken } from "./types";
+    DepositRequest, FetchOption, ManualExitResponse, Options, SupportedToken } from "./types";
 import { getERC20ApproveDataToSign, getMetaTxnCompatibleTokenData, getSignatureParameters } from './meta-transaction/util';
 
 const { config, RESPONSE_CODES } = require('./config');
@@ -304,6 +304,33 @@ class Hyphen {
         } else {
             throw new Error("Unable to get current network from provider during approveERC20 method");
         }
+    }
+
+    triggerManualTransfer = (depositHash: string, chainId: string) : Promise<ManualExitResponse | undefined> => {
+        const self = this;
+        return new Promise( (resolve, reject) => {
+            if(depositHash && chainId && depositHash!=="" && chainId !== "") {
+                const fetchOptions: FetchOption = this.getFetchOptions('POST');
+                const _data = {
+                    "fromChainId" : chainId,
+                    "depositHash" : depositHash
+                }
+                fetchOptions.body = JSON.stringify(_data);
+                const getURL = `${self._getHyphenBaseURL()}${config.getManualTransferPath}`;
+                fetch(getURL, fetchOptions)
+                    .then(response => response.json())
+                    .then((response) => {
+                        self._logMessage(response)
+                        resolve(response);
+                    })
+                    .catch((error) => {
+                        self._logMessage(error);
+                        reject(error);
+                    });
+            } else {
+                reject(this.formatMessage(RESPONSE_CODES.BAD_REQUEST ,"Bad input params. depositHash and chainId are mandatory parameters"));
+            }
+        })
     }
 
     _getERC20ABI = (networkId: number, tokenAddress: string) => {

@@ -92,15 +92,16 @@ defaultSupportedTokens.set(
 
 const config = {
     hyphenBaseUrl: {
-        "test": "https://hyphen-test-api.biconomy.io/api/v1",
-        "staging": "https://hyphen-staging-api.biconomy.io/api/v1",
-        "prod": "https://hyphen-api.biconomy.io/api/v1"
+        "test": "https://hyphen-test-api.biconomy.io",
+        "staging": "https://hyphen-staging-api.biconomy.io",
+        "prod": "https://hyphen-api.biconomy.io"
     },
-    initiateExitPath: "/insta-exit/initiate-exit",
-    getSupportedTokensPath: "/admin/supported-token/list",
-    checkRequestStatusPath: "/insta-exit/system-status",
-    getPoolInfoPath: "/insta-exit/get-pool-info",
-    checkTransferStatusPath: "/insta-exit/check-status",
+    initiateExitPath: "/api/v1/insta-exit/initiate-exit",
+    getSupportedTokensPath: "/api/v1/admin/supported-token/list",
+    checkRequestStatusPath: "/api/v1/insta-exit/system-status",
+    getPoolInfoPath: "/api/v1/insta-exit/get-pool-info",
+	getManualTransferPath: "/api/v1/insta-exit/execute",
+    checkTransferStatusPath: "/api/v1/insta-exit/check-status",
     liquidityPoolManagerABI: LIQUIDITY_POOL_MANAGER_ABI,
     erc20TokenABI: ERC20_ABI,
     erc20ABIByNetworkId,
