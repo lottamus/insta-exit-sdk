@@ -35,7 +35,7 @@ defaultSupportedTokens.set(80001, [
 defaultSupportedTokens.set(137, [
 	{
 		"tokenSymbol": "USDT",
-		"decimal": 18,
+		"decimal": 6,
 		"address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"
 	},
 	{
@@ -75,7 +75,7 @@ defaultSupportedTokens.set(
 	1, [
 	{
 		"tokenSymbol": "USDT",
-		"decimal": 18,
+		"decimal": 6,
 		"address": "0xdac17f958d2ee523a2206206994597c13d831ec7"
 	},
 	{
