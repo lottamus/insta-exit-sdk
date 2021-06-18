@@ -31,8 +31,28 @@ defaultSupportedTokens.set(80001, [
 	}
 ]);
 
+// Set Polygon Network Default Supported Tokens
+defaultSupportedTokens.set(137, [
+	{
+		"tokenSymbol": "USDT",
+		"decimal": 18,
+		"address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"
+	},
+	{
+		"tokenSymbol": "USDC",
+		"decimal": 6,
+		"address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+	},
+	{
+		"tokenSymbol": "DAI",
+		"decimal": 18,
+		"address": "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063"
+	}
+]);
+
 // Set Goerli Network Default Supported Tokens
-defaultSupportedTokens.set(5, [
+defaultSupportedTokens.set(
+	5, [
 	{
 		"tokenSymbol": "USDT",
 		"decimal": 18,
@@ -47,6 +67,26 @@ defaultSupportedTokens.set(5, [
 		"tokenSymbol": "DAI",
 		"decimal": 18,
 		"address": "0x2686eca13186766760a0347ee8eeb5a88710e11b"
+	}
+]);
+
+// Set Ethereum Network Default Supported Tokens
+defaultSupportedTokens.set(
+	1, [
+	{
+		"tokenSymbol": "USDT",
+		"decimal": 18,
+		"address": "0xdac17f958d2ee523a2206206994597c13d831ec7"
+	},
+	{
+		"tokenSymbol": "USDC",
+		"decimal": 6,
+		"address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+	},
+	{
+		"tokenSymbol": "DAI",
+		"decimal": 18,
+		"address": "0x6b175474e89094c44da98b954eedeac495271d0f"
 	}
 ]);
 
@@ -87,10 +127,32 @@ const config = {
                 version: "1",
                 chainId: "80001"
             }
-        }
+		},
+
+		137: {
+            // USDT
+            "0xc2132D05D31c914a87C6611C10748AEb04B58e8F" : {
+                name: "USDT (PoS)",
+                version: "1",
+                chainId: "80001"
+            },
+            // USDC
+            "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174" : {
+                name: "USDC (PoS)", // USD Coin (PoS)
+                version: "1",
+                chainId: "80001"
+            },
+            // DAI
+            "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063" : {
+                name: "Dai Stablecoin (PoS)", // (PoS) Dai Stablecoin
+                version: "1",
+                chainId: "80001"
+            }
+		},
+
     },
     defaultSupportedTokens,
-    supportedNetworkIds: [5, 80001],
+    supportedNetworkIds: [5, 80001, 1, 137],
     defaultExitCheckInterval: 5000,
     maxDepositCheckCallbackCount: 720
 };
