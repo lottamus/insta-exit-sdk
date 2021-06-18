@@ -189,6 +189,8 @@ class Hyphen {
                         this.options.onFundsTransfered(response);
                         clearInterval(this.depositTransactionListenerMap.get(depositHash))
                         this.depositTransactionListenerMap.delete(depositHash);
+                    } else if(response.exitHash) {
+                        this.options.onFundsTransfered(response);
                     }
                 }
                 if(invocationCount >= config.maxDepositCheckCallbackCount) {
