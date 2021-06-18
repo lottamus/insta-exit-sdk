@@ -132,21 +132,21 @@ const config = {
 		137: {
             // USDT
             "0xc2132D05D31c914a87C6611C10748AEb04B58e8F" : {
-                name: "USDT (PoS)",
+                name: "USDT (PoS)", // (PoS) Tether USD
                 version: "1",
-                chainId: "80001"
+                chainId: "137"
             },
             // USDC
             "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174" : {
                 name: "USDC (PoS)", // USD Coin (PoS)
                 version: "1",
-                chainId: "80001"
+                chainId: "137"
             },
             // DAI
             "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063" : {
                 name: "Dai Stablecoin (PoS)", // (PoS) Dai Stablecoin
                 version: "1",
-                chainId: "80001"
+                chainId: "137"
             }
 		},
 
