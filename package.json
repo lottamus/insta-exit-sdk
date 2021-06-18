@@ -31,6 +31,7 @@
     "/dist/*.js"
   ],
   "dependencies": {
+    "@biconomy/mexa": "^2.0.9",
     "ethers": "^5.0.24",
     "promise": "^8.0.3",
     "tslint": "^6.1.3",
