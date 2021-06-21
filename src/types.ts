@@ -1,3 +1,5 @@
+import { Contract } from "@ethersproject/contracts"
+
 export type Config = {
     hyphenBaseUrl: object,
     initiateExitPath: string,
@@ -10,7 +12,8 @@ export type Config = {
     defaultSupportedTokens: Map<number,SupportedToken[]>,
     supportedNetworkIds: number[],
     defaultExitCheckInterval: number,
-    maxDepositCheckCallbackCount: number
+    maxDepositCheckCallbackCount: number,
+    erc20ABIByNetworkId: Map<number, object>
 }
 
 export type CheckStatusRequest = {
@@ -38,7 +41,14 @@ export type Options = {
     environment: string,
     infiniteApproval: boolean,
     exitCheckInterval: number, // Interval in milli seconds to check for exit status
-    onFundsTransfered: (data: ExitResponse) => void
+    onFundsTransfered: (data: ExitResponse) => void,
+    biconomy: BiconomyOption
+}
+
+export type BiconomyOption = {
+    enable: boolean,
+    apiKey: string,
+    debug: boolean
 }
 
 export type FetchOption = {
@@ -81,4 +91,24 @@ export type DepositRequest = {
     amount: string,
     fromChainId: string,
     toChainId: string
+}
+
+export type ERC20ApproveRequest = {
+    contract: Contract,
+    abi: object,
+    domainType: object,
+    metaTransactionType: object,
+    userAddress: string,
+    spender: string,
+    amount: string,
+    name: string,
+    version: string,
+    address: string,
+    salt: string
+}
+
+export type ManualExitResponse = {
+    code: number,
+    message: string,
+    exitHash: string
 }

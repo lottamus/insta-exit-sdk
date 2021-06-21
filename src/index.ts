@@ -1,14 +1,18 @@
 import { BigNumber, ethers } from "ethers";
 import { EXIT_STATUS } from "./config";
 import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse,
-    DepositRequest, FetchOption, Options, SupportedToken } from "./types";
+    DepositRequest, FetchOption, ManualExitResponse, Options, SupportedToken } from "./types";
+import { getERC20ApproveDataToSign, getMetaTxnCompatibleTokenData, getSignatureParameters } from './meta-transaction/util';
 
 const { config, RESPONSE_CODES } = require('./config');
+const { Biconomy } = require("@biconomy/mexa");
+
 
 class Hyphen {
     provider: any;
+    biconomy: any;
     options: Options;
-    supportedTokens: Map<number, SupportedToken[]>;
+    supportedTokens: Map<number, void | SupportedToken[]>;
     depositTransactionListenerMap: Map<string, any>;
 
     constructor(provider: any, options: Options) {
@@ -19,13 +23,40 @@ class Hyphen {
             this.provider = provider;
         } else {
             this._logMessage(`Non-Ethers provider detected`);
-            this.provider = new ethers.providers.Web3Provider(provider);
+            if (this.options.biconomy && this.options.biconomy.enable) {
+                this.biconomy = new Biconomy(provider, {
+                    apiKey: this.options.biconomy.apiKey,
+                    debug: this.options.biconomy.debug
+                });
+                this.provider = new ethers.providers.Web3Provider(this.biconomy);
+            } else {
+                this.provider = new ethers.providers.Web3Provider(provider);
+            }
         }
         this.supportedTokens = new Map();
         this.depositTransactionListenerMap = new Map();
     }
 
-    init = async () => {
+    init = () => {
+        const self = this;
+        return new Promise<void>(async (resolve, reject) => {
+            if(self.options.biconomy && self.options.biconomy.enable
+                && self.biconomy.status !== self.biconomy.READY){
+                self.biconomy.onEvent(self.biconomy.READY, async () => {
+                    await self._init();
+                    resolve();
+                }).onEvent(self.biconomy.ERROR, () => {
+                    self._logMessage("");
+                    reject();
+                })
+            } else {
+                await self._init();
+                resolve();
+            }
+        });
+    }
+
+    _init = async () => {
         const networkIds = config.supportedNetworkIds;
         for(let index = 0; index < networkIds.length; index++) {
             const networkId = networkIds[index];
@@ -33,10 +64,12 @@ class Hyphen {
             this.supportedTokens.set(networkId, supportedTokens);
         }
     }
-
     _validate = (options: Options) => {
         if (!options) {
             throw new Error(`Options object needs to be passed to Hyphen Object`);
+        }
+        if(options.biconomy && options.biconomy.enable && !options.biconomy.apiKey) {
+            throw new Error(`apiKey is required under biconomy option. Either disable biconomy or provide apiKey`);
         }
     }
 
@@ -58,7 +91,7 @@ class Hyphen {
         }
     }
 
-    getSupportedTokens = (networkId: number): (SupportedToken[] | undefined) => {
+    getSupportedTokens = (networkId: number): (SupportedToken[] | void) => {
         return this.supportedTokens.get(networkId);
     }
 
@@ -87,7 +120,7 @@ class Hyphen {
         });
     }
 
-    _getSupportedTokensFromServer = (networkId: number): Promise<SupportedToken[]> => {
+    _getSupportedTokensFromServer = (networkId: number): Promise<SupportedToken[] | void> => {
         const self = this;
         return new Promise(async (resolve, reject) => {
             const fetchOptions: FetchOption = this.getFetchOptions('GET');
@@ -109,6 +142,22 @@ class Hyphen {
                     self._logMessage("Returning default list from config");
                     resolve(config.defaultSupportedTokens.get(networkId));
                 });
+        });
+    }
+
+    getERC20Allowance = (tokenAddress: string, userAddress: string, spender: string) => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                if(tokenAddress && userAddress && spender) {
+                    const tokenContract = new ethers.Contract(tokenAddress, config.erc20TokenABI, this.provider.getUncheckedSigner());
+                    const allowance = await tokenContract.allowance(userAddress, spender);
+                    resolve(allowance);
+                } else {
+                    reject("Bad input parameters. Check if all parameters are valid");
+                }
+            } catch(error) {
+                reject(error);
+            }
         });
     }
 
@@ -140,6 +189,8 @@ class Hyphen {
                         this.options.onFundsTransfered(response);
                         clearInterval(this.depositTransactionListenerMap.get(depositHash))
                         this.depositTransactionListenerMap.delete(depositHash);
+                    } else if(response.exitHash) {
+                        this.options.onFundsTransfered(response);
                     }
                 }
                 if(invocationCount >= config.maxDepositCheckCallbackCount) {
@@ -198,29 +249,102 @@ class Hyphen {
         });
     }
 
-    approveERC20 = async (tokenAddress: string, spender: string, amount: string):
+    approveERC20 = async (tokenAddress: string, spender: string, amount: string, userAddress: string):
         Promise<ethers.providers.TransactionResponse | undefined> => {
-        const tokenContract = new ethers.Contract(tokenAddress, config.erc20TokenABI, this.provider.getUncheckedSigner());
-        if (tokenContract) {
-            if(this.options.infiniteApproval) {
-                amount = ethers.constants.MaxUint256.toString();
-                this._logMessage(`Infinite approval flag is true, so overwriting the amount with value ${amount}`);
+        const currentNetwork = await this.provider.getNetwork();
+        if(currentNetwork) {
+            const erc20ABI = this._getERC20ABI(currentNetwork.chainId, tokenAddress);
+            if(!erc20ABI) {
+                throw new Error(`ERC20 ABI not found for token address ${tokenAddress} on networkId ${currentNetwork.chainId}`)
             }
-            if (spender && amount) {
-                return await tokenContract.approve(spender, amount);
+
+            const tokenContract = new ethers.Contract(tokenAddress, erc20ABI, this.provider.getUncheckedSigner());
+            const tokenContractInterface = new ethers.utils.Interface(erc20ABI);
+            if (tokenContract) {
+                if(this.options.infiniteApproval) {
+                    amount = ethers.constants.MaxUint256.toString();
+                    this._logMessage(`Infinite approval flag is true, so overwriting the amount with value ${amount}`);
+                }
+                if (spender && amount) {
+                    // check if biconomy enable?
+                    if(this.options.biconomy && this.options.biconomy.enable){
+                        if(config.customMetaTxnSupportedNetworksForERC20Tokens.indexOf(currentNetwork.chainId) > -1) {
+                            // Call executeMetaTransaction method
+                            const functionSignature = tokenContractInterface.encodeFunctionData("approve", [spender, amount]);
+                            const tokenData = getMetaTxnCompatibleTokenData(tokenAddress, currentNetwork.chainId);
+                            const dataToSign = await getERC20ApproveDataToSign({
+                                contract: tokenContract,
+                                abi: erc20ABI,
+                                domainType: config.erc20MetaTxnDomainType,
+                                metaTransactionType: config.customMetaTxnType,
+                                userAddress,
+                                spender,
+                                amount,
+                                name: tokenData.name,
+                                version: tokenData.version,
+                                address: tokenAddress,
+                                salt: '0x' + (currentNetwork.chainId).toString(16).padStart(64, '0')
+                            });
+                            // Its important to use eth_signTypedData_v3 and not v4 to get EIP712 signature because we have used salt in domain data
+                            // instead of chainId
+                            const signature = await this.provider.send("eth_signTypedData_v3", [userAddress, dataToSign])
+                            const { r, s, v } = getSignatureParameters(signature);
+                            return await tokenContract.executeMetaTransaction(userAddress, functionSignature, r, s, v);
+                        } else {
+                            return await tokenContract.approve(spender, amount);
+                        }
+                    } else {
+                        return await tokenContract.approve(spender, amount);
+                    }
+                } else {
+                    this._logMessage(`One of the inputs is not valid => spender: ${spender}, amount: ${amount}`)
+                }
             } else {
-                this._logMessage(`One of the inputs is not valid => spender: ${spender}, amount: ${amount}`)
+                this._logMessage("Token contract is not defined");
+                throw new Error("Token contract is not defined. Please check if token address is present on the current chain");
             }
         } else {
-            this._logMessage("Token contract is not defined");
-            throw new Error("Token contract is not defined. Please check if token address is present on the current chain");
+            throw new Error("Unable to get current network from provider during approveERC20 method");
         }
+    }
+
+    triggerManualTransfer = (depositHash: string, chainId: string) : Promise<ManualExitResponse | undefined> => {
+        const self = this;
+        return new Promise( (resolve, reject) => {
+            if(depositHash && chainId && depositHash!=="" && chainId !== "") {
+                const fetchOptions: FetchOption = this.getFetchOptions('POST');
+                const _data = {
+                    "fromChainId" : chainId,
+                    "depositHash" : depositHash
+                }
+                fetchOptions.body = JSON.stringify(_data);
+                const getURL = `${self._getHyphenBaseURL()}${config.getManualTransferPath}`;
+                fetch(getURL, fetchOptions)
+                    .then(response => response.json())
+                    .then((response) => {
+                        self._logMessage(response)
+                        resolve(response);
+                    })
+                    .catch((error) => {
+                        self._logMessage(error);
+                        reject(error);
+                    });
+            } else {
+                reject(this.formatMessage(RESPONSE_CODES.BAD_REQUEST ,"Bad input params. depositHash and chainId are mandatory parameters"));
+            }
+        })
+    }
+
+    _getERC20ABI = (networkId: number, tokenAddress: string) => {
+        // tokenAddress to be used in future for any custom token support
+        return config.erc20ABIByNetworkId.get(networkId);
     }
 
     _depositTokensToLiquidityPoolManager = async (request: DepositRequest) => {
         const liquidityPoolManager = new ethers.Contract(request.depositContractAddress,
             config.liquidityPoolManagerABI, this.provider.getUncheckedSigner());
-        const transaction = await liquidityPoolManager.depositErc20(request.tokenAddress, request.receiver, request.amount, request.toChainId);
+        const transaction = await liquidityPoolManager.depositErc20(request.tokenAddress, request.receiver,
+            request.amount, request.toChainId);
         return transaction;
     }
 
