@@ -17,17 +17,17 @@ defaultSupportedTokens.set(80001, [
 	{
 		"tokenSymbol": "USDT",
 		"decimal": 18,
-		"address": "0xeaBc4b91d9375796AA4F69cC764A4aB509080A58"
+		"address": "0xeabc4b91d9375796aa4f69cc764a4ab509080a58"
 	},
 	{
 		"tokenSymbol": "USDC",
 		"decimal": 6,
-		"address": "0xdA5289fCAAF71d52a80A254da614a192b693e977"
+		"address": "0xda5289fcaaf71d52a80a254da614a192b693e977"
 	},
 	{
 		"tokenSymbol": "DAI",
 		"decimal": 18,
-		"address": "0x27a44456bEDb94DbD59D0f0A14fE977c777fC5C3"
+		"address": "0x27a44456bedb94dbd59d0f0a14fe977c777fc5c3"
 	}
 ]);
 
@@ -36,17 +36,17 @@ defaultSupportedTokens.set(137, [
 	{
 		"tokenSymbol": "USDT",
 		"decimal": 6,
-		"address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F"
+		"address": "0xc2132d05d31c914a87c6611c10748aeb04b58e8f"
 	},
 	{
 		"tokenSymbol": "USDC",
 		"decimal": 6,
-		"address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+		"address": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174"
 	},
 	{
 		"tokenSymbol": "DAI",
 		"decimal": 18,
-		"address": "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063"
+		"address": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063"
 	}
 ]);
 
@@ -61,7 +61,7 @@ defaultSupportedTokens.set(
 	{
 		"tokenSymbol": "USDC",
 		"decimal": 6,
-		"address": "0xb5B640E6414b6DeF4FC9B3C1EeF373925effeCcF"
+		"address": "0xb5b640e6414b6def4fc9b3c1eef373925effeccf"
 	},
 	{
 		"tokenSymbol": "DAI",
@@ -132,25 +132,31 @@ const config = {
 
 		137: {
             // USDT
-            "0xc2132D05D31c914a87C6611C10748AEb04B58e8F" : {
+            "0xc2132d05d31c914a87c6611c10748aeb04b58e8f" : {
                 name: "USDT (PoS)", // (PoS) Tether USD
                 version: "1",
                 chainId: "137"
             },
             // USDC
-            "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174" : {
+            "0x2791bca1f2de4661ed88a30c99a7a9449aa84174" : {
                 name: "USDC (PoS)", // USD Coin (PoS)
                 version: "1",
                 chainId: "137"
             },
             // DAI
-            "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063" : {
+            "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063" : {
                 name: "Dai Stablecoin (PoS)", // (PoS) Dai Stablecoin
                 version: "1",
                 chainId: "137"
             }
 		},
-
+		1: {
+			"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": {
+				name: "USDC",
+                version: "1",
+                chainId: "1"
+			}
+		}
     },
     defaultSupportedTokens,
     supportedNetworkIds: [5, 80001, 1, 137],
