@@ -272,7 +272,7 @@ class Hyphen {
                         const customMetaTxSupport = config.customMetaTxnSupportedNetworksForERC20Tokens[currentNetwork.chainId];
                         if(customMetaTxSupport && customMetaTxSupport.indexOf(tokenAddress.toLowerCase()) > -1) {
                             // Call executeMetaTransaction method
-                            const functionSignature = tokenContractInterface.encodeFunctionData("approve", [spender, approvalAmount.toNumber()]);
+                            const functionSignature = tokenContractInterface.encodeFunctionData("approve", [spender, approvalAmount.toString()]);
                             const tokenData = getMetaTxnCompatibleTokenData(tokenAddress, currentNetwork.chainId);
                             const dataToSign = await getERC20ApproveDataToSign({
                                 contract: tokenContract,
@@ -281,7 +281,7 @@ class Hyphen {
                                 metaTransactionType: config.customMetaTxnType,
                                 userAddress,
                                 spender,
-                                amount,
+                                amount: approvalAmount.toString(),
                                 name: tokenData.name,
                                 version: tokenData.version,
                                 address: tokenAddress,
@@ -312,19 +312,19 @@ class Hyphen {
                                 message: {
                                   owner: userAddress,
                                   spender,
-                                  value: approvalAmount.toNumber(),
+                                  value: approvalAmount.toString(),
                                   nonce: parseInt(nonce, 10),
                                   deadline
                                 },
                               };
                               const signature = await this.provider.send("eth_signTypedData_v4", [userAddress, JSON.stringify(permitDataToSign)]);
                               const { r, s, v } = getSignatureParameters(signature);
-                              return await tokenContract.permit(userAddress, spender, approvalAmount.toNumber(), deadline, v, r, s);
+                              return await tokenContract.permit(userAddress, spender, approvalAmount.toString(), deadline, v, r, s);
                         } else {
-                            return await tokenContract.approve(spender, approvalAmount.toNumber());
+                            return await tokenContract.approve(spender, approvalAmount.toString());
                         }
                     } else {
-                        return await tokenContract.approve(spender, approvalAmount.toNumber());
+                        return await tokenContract.approve(spender, approvalAmount.toString());
                     }
                 } else {
                     this._logMessage(`One of the inputs is not valid => spender: ${spender}, amount: ${amount}`)
