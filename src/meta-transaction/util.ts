@@ -7,7 +7,7 @@ const getERC20ApproveDataToSign = async (data: ERC20ApproveRequest) => {
     const contract = data.contract;
     const contractInterface = new ethers.utils.Interface(JSON.stringify(data.abi));
     const userAddress = data.userAddress;
-    const nonce = await contract.getNonce(userAddress);
+    const nonce = await (contract.getNonce ? contract.getNonce(userAddress) : contract.nonces(userAddress));
     const functionSignature = contractInterface.encodeFunctionData("approve", [data.spender, data.amount]);
     const message = {
         nonce : parseInt(nonce, 10),
