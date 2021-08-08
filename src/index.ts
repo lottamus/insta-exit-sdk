@@ -56,13 +56,18 @@ class Hyphen {
     }
 
     _init = async () => {
-        const networkIds = config.supportedNetworkIds;
-        for(let index = 0; index < networkIds.length; index++) {
-            const networkId = networkIds[index];
-            const supportedTokens = await this._getSupportedTokensFromServer(networkId);
-            this.supportedTokens.set(networkId, supportedTokens);
+        if(this.provider) {
+            const currentNetwork = await this.provider.getNetwork();
+            const networkId = currentNetwork.chainId;
+            if(networkId) {
+                const supportedTokens = await this._getSupportedTokensFromServer(networkId);
+                this.supportedTokens.set(networkId, supportedTokens);
+            } else {
+                throw new Error("Unable to get network id from given provider object");
+            }
         }
     }
+
     _validate = (options: Options) => {
         if (!options) {
             throw new Error(`Options object needs to be passed to Hyphen Object`);
