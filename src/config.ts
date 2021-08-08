@@ -62,7 +62,7 @@ const tokensMap = {
             decimal: 6,
             symbol: "USDC",
 			name: "USD Coin",
-			version: "1"
+			version: "2"
         }
     },
     "DAI" : {

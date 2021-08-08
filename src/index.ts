@@ -44,9 +44,10 @@ class Hyphen {
                 self.biconomy.onEvent(self.biconomy.READY, async () => {
                     await self._init();
                     resolve();
-                }).onEvent(self.biconomy.ERROR, () => {
-                    self._logMessage("");
-                    reject();
+                }).onEvent(self.biconomy.ERROR, (error: object, message: string) => {
+                    self._logMessage(error);
+                    self._logMessage(message);
+                    reject(error);
                 })
             } else {
                 await self._init();
