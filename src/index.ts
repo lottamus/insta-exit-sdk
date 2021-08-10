@@ -268,7 +268,7 @@ class Hyphen {
             const tokenContractInterface = new ethers.utils.Interface(erc20ABI);
             const tokenInfo = config.tokenAddressMap[tokenAddress.toLowerCase()] ? config.tokenAddressMap[tokenAddress.toLowerCase()][currentNetwork.chainId] : undefined;
             if (tokenContract) {
-                if((infiniteApproval !== undefined && infiniteApproval) || this.options.infiniteApproval) {
+                if((infiniteApproval !== undefined && infiniteApproval) || (infiniteApproval === undefined && this.options.infiniteApproval)) {
                     approvalAmount = ethers.constants.MaxUint256;
                     this._logMessage(`Infinite approval flag is true, so overwriting the amount with value ${amount}`);
                 }
