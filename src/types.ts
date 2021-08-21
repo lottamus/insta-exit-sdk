@@ -92,7 +92,8 @@ export type DepositRequest = {
     depositContractAddress: string,
     amount: string,
     fromChainId: string,
-    toChainId: string
+    toChainId: string,
+    useBiconomy:boolean
 }
 
 export type ERC20ApproveRequest = {
