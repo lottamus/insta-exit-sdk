@@ -125,5 +125,6 @@ export type Transaction = {
     from: string,
     data?: string,
     to: string,
-    signatureType?: string
+    signatureType?: string,
+    value: string
 }

@@ -3,6 +3,7 @@ import { EXIT_STATUS, SIGNATURE_TYPES } from "./config";
 import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse,
     DepositRequest, FetchOption, ManualExitResponse, Options, SupportedToken, Transaction, TransactionResponse } from "./types";
 import { getERC20ApproveDataToSign, getMetaTxnCompatibleTokenData, getSignatureParameters } from './meta-transaction/util';
+import { isNativeAddress } from './util';
 
 const { config, RESPONSE_CODES } = require('./config');
 const { Biconomy } = require("@biconomy/mexa");
@@ -187,15 +188,25 @@ class Hyphen {
 
     deposit = async (request: DepositRequest): Promise<TransactionResponse | undefined> => {
         const provider = this._getProvider(request.useBiconomy);
-        const tokenContract = new ethers.Contract(request.tokenAddress, config.erc20TokenABI, provider.getUncheckedSigner());
-        const allowance = await tokenContract.allowance(request.sender, request.depositContractAddress);
-        this._logMessage(`Allowance given to LiquidityPoolManager is ${allowance}`);
-        if (BigNumber.from(request.amount).lte(allowance)) {
+        if(isNativeAddress(request.tokenAddress)) {
             const depositTransaction = await this._depositTokensToLiquidityPoolManager(request);
-            this.listenForExitTransaction(depositTransaction, parseInt(request.fromChainId, 10));
+            if(depositTransaction) {
+                this.listenForExitTransaction(depositTransaction, parseInt(request.fromChainId, 10));
+            }
             return depositTransaction;
         } else {
-            return Promise.reject(this.formatMessage(RESPONSE_CODES.ALLOWANCE_NOT_GIVEN,`Not enough allowance given to Liquidity Pool Manager contract`));
+            const tokenContract = new ethers.Contract(request.tokenAddress, config.erc20TokenABI, provider.getUncheckedSigner());
+            const allowance = await tokenContract.allowance(request.sender, request.depositContractAddress);
+            this._logMessage(`Allowance given to LiquidityPoolManager is ${allowance}`);
+            if (BigNumber.from(request.amount).lte(allowance)) {
+                const depositTransaction = await this._depositTokensToLiquidityPoolManager(request);
+                if(depositTransaction) {
+                    this.listenForExitTransaction(depositTransaction, parseInt(request.fromChainId, 10));
+                }
+                return depositTransaction;
+            } else {
+                return Promise.reject(this.formatMessage(RESPONSE_CODES.ALLOWANCE_NOT_GIVEN,`Not enough allowance given to Liquidity Pool Manager contract`));
+            }
         }
     }
 
@@ -403,30 +414,45 @@ class Hyphen {
     }
 
     _depositTokensToLiquidityPoolManager = async (request: DepositRequest) => {
-        const provider = this._getProvider(request.useBiconomy);
-        const liquidityPoolManager = new ethers.Contract(request.depositContractAddress,
-            config.liquidityPoolManagerABI, provider.getUncheckedSigner());
+        try {
+            const provider = this._getProvider(request.useBiconomy);
+            const lpManager = new ethers.Contract(request.depositContractAddress,
+                config.liquidityPoolManagerABI, provider.getUncheckedSigner());
 
-        const { data } = await liquidityPoolManager.populateTransaction.depositErc20(request.tokenAddress, request.receiver,
-            request.amount, request.toChainId);
-
-        const txParams: Transaction = {
-            data,
-            to: request.depositContractAddress,
-            from: request.sender
-        };
-        if(this.options.signatureType) {
-            txParams.signatureType = this.options.signatureType;
-        }
-        const transactionHash = await provider.send("eth_sendTransaction", [txParams]);
-
-        const response : TransactionResponse = {
-            hash: transactionHash,
-            wait: (confirmations?: number): ethers.providers.TransactionReceipt => {
-                return provider.waitForTransaction(transactionHash, confirmations);
+            let txData;
+            let value = '0';
+            if(isNativeAddress(request.tokenAddress)) {
+                const { data } = await lpManager.populateTransaction.depositNative(request.receiver, request.toChainId);
+                txData = data;
+                value = ethers.BigNumber.from(request.amount).toHexString();
+            } else {
+                const { data } = await lpManager.populateTransaction.depositErc20(request.tokenAddress, request.receiver,
+                    request.amount, request.toChainId);
+                txData = data;
             }
-        };
-        return response;
+
+            const txParams: Transaction = {
+                data: txData,
+                to: request.depositContractAddress,
+                from: request.sender,
+                value
+            };
+            if(this.options.signatureType) {
+                txParams.signatureType = this.options.signatureType;
+            }
+            const transactionHash = await this._getProvider(request.useBiconomy).send("eth_sendTransaction", [txParams]);
+
+            const response : TransactionResponse = {
+                hash: transactionHash,
+                wait: (confirmations?: number): ethers.providers.TransactionReceipt => {
+                    return this._getProvider(request.useBiconomy).waitForTransaction(transactionHash, confirmations);
+                }
+            };
+            return response;
+
+        } catch(error) {
+            this._logMessage(error);
+        }
     }
 
     _getHyphenBaseURL = () => {

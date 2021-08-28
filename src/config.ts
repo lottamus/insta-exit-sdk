@@ -293,7 +293,8 @@ const config = {
 		{ name: "version", type: "string" },
 		{ name: "chainId", type: "uint256" },
 		{ name: "verifyingContract", type: "address" }
-	]
+	],
+	NATIVE_ADDRESS: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
 };
 
 
