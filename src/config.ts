@@ -230,7 +230,7 @@ defaultSupportedTokens.set(
 
 const config = {
 	hyphenBaseUrl: {
-		"test": "http://localhost:3000",
+		"test": "https://hyphen-test-api.biconomy.io",
 		"staging": "https://hyphen-staging-api.biconomy.io",
 		"prod": "https://hyphen-api.biconomy.io"
 	},
