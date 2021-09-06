@@ -44,7 +44,14 @@ export type Options = {
     infiniteApproval: boolean,
     exitCheckInterval: number, // Interval in milli seconds to check for exit status
     onFundsTransfered: (data: ExitResponse) => void,
-    biconomy: BiconomyOption
+    biconomy: BiconomyOption,
+    walletProvider?: object
+}
+
+export type InternalBiconomyOption = {
+    apiKey: string,
+    debug: boolean,
+    walletProvider?: object
 }
 
 export type BiconomyOption = {

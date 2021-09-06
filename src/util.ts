@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 import { config } from "./config";
 
 function toJSONRPCPayload(engine: any, method: string, params: any) {
@@ -28,7 +29,12 @@ function isNativeAddress(address: string) : boolean {
     return result;
 }
 
+const isEthersProvider = (provider: object) => {
+    return ethers.providers.Provider.isProvider(provider);
+}
+
 export {
     toJSONRPCPayload,
-    isNativeAddress
+    isNativeAddress,
+    isEthersProvider
 }

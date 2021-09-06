@@ -1,15 +1,16 @@
 import { BigNumber, ethers } from "ethers";
 import { EXIT_STATUS, SIGNATURE_TYPES } from "./config";
 import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse,
-    DepositRequest, FetchOption, ManualExitResponse, Options, SupportedToken, Transaction, TransactionResponse } from "./types";
+    DepositRequest, FetchOption, InternalBiconomyOption, ManualExitResponse, Options, SupportedToken, Transaction, TransactionResponse } from "./types";
 import { getERC20ApproveDataToSign, getMetaTxnCompatibleTokenData, getSignatureParameters } from './meta-transaction/util';
-import { isNativeAddress } from './util';
+import { isEthersProvider, isNativeAddress } from './util';
 
 const { config, RESPONSE_CODES } = require('./config');
 const { Biconomy } = require("@biconomy/mexa");
 
 class Hyphen {
     provider: any;
+    walletProvider: any;
     biconomyProvider: any;
     biconomy: any;
     options: Options;
@@ -21,29 +22,30 @@ class Hyphen {
         this.options = options;
         if (ethers.providers.Provider.isProvider(provider)) {
             this._logMessage(`Ethers provider detected`);
-            if (this.options.biconomy && this.options.biconomy.enable) {
-                this.biconomy = new Biconomy(provider, {
-                    apiKey: this.options.biconomy.apiKey,
-                    debug: this.options.biconomy.debug
-                });
-                this.biconomyProvider = new ethers.providers.Web3Provider(this.biconomy);
-                this.provider = provider;
-            } else {
-                this.provider = provider;
-            }
+            this.provider = provider;
         } else {
             this._logMessage(`Non-Ethers provider detected`);
-            if (this.options.biconomy && this.options.biconomy.enable) {
-                this.biconomy = new Biconomy(new ethers.providers.Web3Provider(provider), {
-                    apiKey: this.options.biconomy.apiKey,
-                    debug: this.options.biconomy.debug
-                });
-                this.biconomyProvider = new ethers.providers.Web3Provider(this.biconomy);
-                this.provider = new ethers.providers.Web3Provider(provider);
-            } else {
-                this.provider = new ethers.providers.Web3Provider(provider);
-            }
+            this.provider = new ethers.providers.Web3Provider(provider);
         }
+
+        if (this.options.biconomy && this.options.biconomy.enable) {
+            const biconomyOptions : InternalBiconomyOption = {
+                apiKey: this.options.biconomy.apiKey,
+                debug: this.options.biconomy.debug
+            };
+            if(options.walletProvider) {
+                biconomyOptions.walletProvider = options.walletProvider;
+            }
+            this.biconomy = new Biconomy(this.provider, biconomyOptions);
+            this.biconomyProvider = new ethers.providers.Web3Provider(this.biconomy);
+        }
+        if(options.walletProvider) {
+            if(isEthersProvider(options.walletProvider)) {
+              throw new Error("Wallet Provider in options can't be an ethers provider. Please pass the provider you get from your wallet directly.")
+            }
+            this.walletProvider = new ethers.providers.Web3Provider(options.walletProvider);
+        }
+
         this.supportedTokens = new Map();
         this.depositTransactionListenerMap = new Map();
     }
@@ -98,8 +100,18 @@ class Hyphen {
         }
     }
 
+    _getProviderWithAccounts = (useBiconomy: boolean) => {
+        let result;
+        if(this.walletProvider) {
+            result = this.walletProvider;
+        } else {
+            result = this._getProvider(useBiconomy);
+        }
+        return result;
+    }
+
     getERC20TokenDecimals = (address: string) => {
-        const tokenContract = new ethers.Contract(address, config.erc20TokenABI, this.provider);
+        const tokenContract = new ethers.Contract(address, config.erc20TokenABI, this._getProvider(false));
         if(tokenContract) {
             return tokenContract.decimals();
         } else {
@@ -174,7 +186,7 @@ class Hyphen {
         return new Promise(async (resolve, reject) => {
             try {
                 if(tokenAddress && userAddress && spender) {
-                    const tokenContract = new ethers.Contract(tokenAddress, config.erc20TokenABI, this.provider.getUncheckedSigner());
+                    const tokenContract = new ethers.Contract(tokenAddress, config.erc20TokenABI, this._getProvider(false));
                     const allowance = await tokenContract.allowance(userAddress, spender);
                     resolve(allowance);
                 } else {
@@ -195,7 +207,7 @@ class Hyphen {
             }
             return depositTransaction;
         } else {
-            const tokenContract = new ethers.Contract(request.tokenAddress, config.erc20TokenABI, provider.getUncheckedSigner());
+            const tokenContract = new ethers.Contract(request.tokenAddress, config.erc20TokenABI, provider);
             const allowance = await tokenContract.allowance(request.sender, request.depositContractAddress);
             this._logMessage(`Allowance given to LiquidityPoolManager is ${allowance}`);
             if (BigNumber.from(request.amount).lte(allowance)) {
@@ -287,7 +299,7 @@ class Hyphen {
 
     approveERC20 = async (tokenAddress: string, spender: string, amount: string, userAddress: string,
         infiniteApproval: boolean, useBiconomy: boolean):
-        Promise<ethers.providers.TransactionResponse | undefined> => {
+        Promise<TransactionResponse | undefined> => {
         const provider = this._getProvider(useBiconomy);
         const currentNetwork = await provider.getNetwork();
         let approvalAmount: BigNumber = BigNumber.from(amount);
@@ -297,7 +309,7 @@ class Hyphen {
                 throw new Error(`ERC20 ABI not found for token address ${tokenAddress} on networkId ${currentNetwork.chainId}`)
             }
 
-            const tokenContract = new ethers.Contract(tokenAddress, erc20ABI, provider.getUncheckedSigner());
+            const tokenContract = new ethers.Contract(tokenAddress, erc20ABI, provider);
             const tokenContractInterface = new ethers.utils.Interface(erc20ABI);
             const tokenInfo = config.tokenAddressMap[tokenAddress.toLowerCase()] ? config.tokenAddressMap[tokenAddress.toLowerCase()][currentNetwork.chainId] : undefined;
             if (tokenContract) {
@@ -326,11 +338,23 @@ class Hyphen {
                                 address: tokenAddress,
                                 salt: '0x' + (currentNetwork.chainId).toString(16).padStart(64, '0')
                             });
-                            // Its important to use eth_signTypedData_v3 and not v4 to get EIP712 signature because we have used salt in domain data
-                            // instead of chainId
-                            const signature = await provider.send("eth_signTypedData_v4", [userAddress, dataToSign])
-                            const { r, s, v } = getSignatureParameters(signature);
-                            return await tokenContract.executeMetaTransaction(userAddress, functionSignature, r, s, v);
+
+                            const _provider = this._getProviderWithAccounts(useBiconomy);
+                            if(_provider) {
+                                const signature = await _provider.send("eth_signTypedData_v4", [userAddress, dataToSign])
+                                const { r, s, v } = getSignatureParameters(signature);
+
+                                const { data } = await tokenContract.populateTransaction.executeMetaTransaction(userAddress, functionSignature, r, s, v);
+                                const txParams: Transaction = {
+                                    data,
+                                    to: tokenAddress,
+                                    from: userAddress,
+                                    value: '0'
+                                };
+                                return this._sendTransaction(provider, txParams);
+                            } else {
+                                throw new Error("Couldn't get a provider to get user signature. Make sure you have passed correct provider or walletProvider field in Hyphen constructor.");
+                            }
                         } else if(tokenInfo && tokenInfo.symbol === 'USDC') {
                             // If token is USDC call permit method
                             const deadline:number = Number(Math.floor(Date.now() / 1000 + 3600));
@@ -355,15 +379,42 @@ class Hyphen {
                                   nonce: parseInt(nonce, 10),
                                   deadline
                                 },
-                              };
-                              const signature = await provider.send("eth_signTypedData_v4", [userAddress, JSON.stringify(permitDataToSign)]);
-                              const { r, s, v } = getSignatureParameters(signature);
-                              return await tokenContract.permit(userAddress, spender, approvalAmount.toString(), deadline, v, r, s);
+                            };
+                            const _provider = this._getProviderWithAccounts(useBiconomy);
+                            if(_provider) {
+                                const signature = await _provider.send("eth_signTypedData_v4", [userAddress, JSON.stringify(permitDataToSign)]);
+                                const { r, s, v } = getSignatureParameters(signature);
+
+                                const { data } = await tokenContract.populateTransaction.permit(userAddress, spender, approvalAmount.toString(), deadline, v, r, s);
+                                const txParams: Transaction = {
+                                    data,
+                                    to: tokenAddress,
+                                    from: userAddress,
+                                    value: '0'
+                                };
+                                return this._sendTransaction(provider, txParams);
+                            } else {
+                                throw new Error("Couldn't get a provider to get user signature. Make sure you have passed correct provider or walletProvider field in Hyphen constructor.");
+                            }
                         } else {
-                            return await tokenContract.approve(spender, approvalAmount.toString());
+                            const { data } = await tokenContract.populateTransaction.approve(spender, approvalAmount.toString());
+                            const txParams: Transaction = {
+                                data,
+                                to: tokenAddress,
+                                from: userAddress,
+                                value: '0'
+                            };
+                            return this._sendTransaction(provider, txParams);
                         }
                     } else {
-                        return await tokenContract.approve(spender, approvalAmount.toString());
+                        const { data } = await tokenContract.populateTransaction.approve(spender, approvalAmount.toString());
+                        const txParams: Transaction = {
+                            data,
+                            to: tokenAddress,
+                            from: userAddress,
+                            value: '0'
+                        };
+                        return this._sendTransaction(provider, txParams);
                     }
                 } else {
                     this._logMessage(`One of the inputs is not valid => spender: ${spender}, amount: ${amount}`)
@@ -417,7 +468,7 @@ class Hyphen {
         try {
             const provider = this._getProvider(request.useBiconomy);
             const lpManager = new ethers.Contract(request.depositContractAddress,
-                config.liquidityPoolManagerABI, provider.getUncheckedSigner());
+                config.liquidityPoolManagerABI, provider);
 
             let txData;
             let value = '0';
@@ -440,18 +491,26 @@ class Hyphen {
             if(this.options.signatureType) {
                 txParams.signatureType = this.options.signatureType;
             }
-            const transactionHash = await this._getProvider(request.useBiconomy).send("eth_sendTransaction", [txParams]);
+
+            return this._sendTransaction(provider, txParams);
+        } catch(error) {
+            this._logMessage(error);
+        }
+    }
+
+    _sendTransaction = async (_provider: any, rawTransaction: Transaction) => {
+        if(_provider && rawTransaction) {
+            const transactionHash = await _provider.send("eth_sendTransaction", [rawTransaction]);
 
             const response : TransactionResponse = {
                 hash: transactionHash,
                 wait: (confirmations?: number): ethers.providers.TransactionReceipt => {
-                    return this._getProvider(request.useBiconomy).waitForTransaction(transactionHash, confirmations);
+                    return _provider.waitForTransaction(transactionHash, confirmations);
                 }
             };
             return response;
-
-        } catch(error) {
-            this._logMessage(error);
+        } else {
+            throw new Error("Error while sending transaction. Either provider or rawTransaction is not defined");
         }
     }
 

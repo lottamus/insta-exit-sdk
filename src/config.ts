@@ -6,6 +6,7 @@ const CUSTOM_META_TXN_ENABLED_ERC20_ABI = [{ "type": "constructor", "stateMutabi
 const ERC20_META_TXN_DOMAIN_TYPE = [{ name: "name", type: "string" }, { name: "version", type: "string" }, { name: "verifyingContract", type: "address" }, { name: "salt", type: "bytes32" }];
 const CUSTOM_META_TXN_TYPE = [{ name: "nonce", type: "uint256" }, { name: "from", type: "address" }, { name: "functionSignature", type: "bytes" }];
 
+const NATIVE_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 
 const tokensMap = {
     "USDT" : {
@@ -91,7 +92,32 @@ const tokensMap = {
             symbol: "DAI"
         }
     },
-
+	"ETH" : {
+        80001: {
+            address: "0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa",
+            transferOverhead: 29766,
+            decimal: 18,
+            symbol: "ETH"
+        },
+        5: {
+            address: NATIVE_ADDRESS,
+            transferOverhead: 29766,
+            decimal: 18,
+            symbol: "ETH"
+        },
+        137: {
+            address: "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
+            transferOverhead: 29766,
+            decimal: 18,
+            symbol: "ETH"
+        },
+        1: {
+            address: NATIVE_ADDRESS,
+            transferOverhead: 29766,
+            decimal: 18,
+            symbol: "ETH"
+        }
+    }
 };
 
 const tokenAddressMap = {
@@ -204,7 +230,7 @@ defaultSupportedTokens.set(
 
 const config = {
 	hyphenBaseUrl: {
-		"test": "https://hyphen-test-api.biconomy.io",
+		"test": "http://localhost:3000",
 		"staging": "https://hyphen-staging-api.biconomy.io",
 		"prod": "https://hyphen-api.biconomy.io"
 	},
@@ -220,8 +246,8 @@ const config = {
 	erc20ABIByToken,
 
 	customMetaTxnSupportedNetworksForERC20Tokens: {
-		80001: [tokensMap.USDC[80001].address,tokensMap.USDT[80001].address,tokensMap.DAI[80001].address],
-		137 : [tokensMap.USDC[137].address,tokensMap.USDT[137].address,tokensMap.DAI[137].address]
+		80001: [tokensMap.USDC[80001].address,tokensMap.USDT[80001].address,tokensMap.DAI[80001].address, tokensMap.ETH[80001].address],
+		137 : [tokensMap.USDC[137].address,tokensMap.USDT[137].address,tokensMap.DAI[137].address, tokensMap.ETH[137].address]
 	},
 	erc20MetaTxnDomainType: ERC20_META_TXN_DOMAIN_TYPE,
 	customMetaTxnType: CUSTOM_META_TXN_TYPE,
@@ -242,6 +268,12 @@ const config = {
 			// DAI
 			"0x27a44456bedb94dbd59d0f0a14fe977c777fc5c3": {
 				name: "Dai Stablecoin (PoS)",
+				version: "1",
+				chainId: "80001"
+			},
+			// WETH
+			"0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa": {
+				name: "Wrapped Ether",
 				version: "1",
 				chainId: "80001"
 			}
@@ -294,7 +326,7 @@ const config = {
 		{ name: "chainId", type: "uint256" },
 		{ name: "verifyingContract", type: "address" }
 	],
-	NATIVE_ADDRESS: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+	NATIVE_ADDRESS
 };
 
 
