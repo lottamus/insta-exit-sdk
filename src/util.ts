@@ -1,3 +1,6 @@
+import { ethers } from "ethers";
+import { config } from "./config";
+
 function toJSONRPCPayload(engine: any, method: string, params: any) {
     if (!method) {
         throw new Error('JSONRPC method should be specified for params: "'+ JSON.stringify(params) +'"!');
@@ -18,4 +21,20 @@ function toJSONRPCPayload(engine: any, method: string, params: any) {
     };
 };
 
-module.exports = {toJSONRPCPayload}
+function isNativeAddress(address: string) : boolean {
+    let result: boolean = false;
+    if(address && address.toLowerCase() === config.NATIVE_ADDRESS) {
+        result = true;
+    }
+    return result;
+}
+
+const isEthersProvider = (provider: object) => {
+    return ethers.providers.Provider.isProvider(provider);
+}
+
+export {
+    toJSONRPCPayload,
+    isNativeAddress,
+    isEthersProvider
+}

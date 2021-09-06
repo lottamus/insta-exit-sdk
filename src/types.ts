@@ -1,4 +1,5 @@
 import { Contract } from "@ethersproject/contracts"
+import { ethers } from "ethers"
 
 export type Config = {
     hyphenBaseUrl: object,
@@ -39,10 +40,18 @@ export type Options = {
     defaultAccount: string,
     debug: boolean,
     environment: string,
+    signatureType: string,
     infiniteApproval: boolean,
     exitCheckInterval: number, // Interval in milli seconds to check for exit status
     onFundsTransfered: (data: ExitResponse) => void,
-    biconomy: BiconomyOption
+    biconomy: BiconomyOption,
+    walletProvider?: object
+}
+
+export type InternalBiconomyOption = {
+    apiKey: string,
+    debug: boolean,
+    walletProvider?: object
 }
 
 export type BiconomyOption = {
@@ -90,7 +99,8 @@ export type DepositRequest = {
     depositContractAddress: string,
     amount: string,
     fromChainId: string,
-    toChainId: string
+    toChainId: string,
+    useBiconomy:boolean
 }
 
 export type ERC20ApproveRequest = {
@@ -111,4 +121,17 @@ export type ManualExitResponse = {
     code: number,
     message: string,
     exitHash: string
+}
+
+export type TransactionResponse = {
+    hash: string,
+    wait: (confirmations?: number) => ethers.providers.TransactionReceipt
+}
+
+export type Transaction = {
+    from: string,
+    data?: string,
+    to: string,
+    signatureType?: string,
+    value: string
 }
