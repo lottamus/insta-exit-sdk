@@ -297,6 +297,12 @@ const config = {
 				name: "(PoS) Dai Stablecoin", // (PoS) Dai Stablecoin
 				version: "1",
 				chainId: "137"
+			},
+			// WETH
+			"0x7ceb23fd6bc0add59e62ac25578270cff1b9f619" : {
+				name: "Wrapped Ether", // (PoS) Dai Stablecoin
+				version: "1",
+				chainId: "137"
 			}
 		},
 		1: {
