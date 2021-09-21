@@ -471,7 +471,7 @@ class Hyphen {
                 config.liquidityPoolManagerABI, provider);
 
             let txData;
-            let value = '0';
+            let value = '0x0';
             if(isNativeAddress(request.tokenAddress)) {
                 const { data } = await lpManager.populateTransaction.depositNative(request.receiver, request.toChainId);
                 txData = data;

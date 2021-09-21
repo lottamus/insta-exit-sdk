@@ -230,7 +230,7 @@ defaultSupportedTokens.set(
 
 const config = {
 	hyphenBaseUrl: {
-		"test": "http://localhost:3000",
+		"test": "https://hyphen-test-api.biconomy.io",
 		"staging": "https://hyphen-staging-api.biconomy.io",
 		"prod": "https://hyphen-api.biconomy.io"
 	},
@@ -295,6 +295,12 @@ const config = {
 			// DAI
 			"0x8f3cf7ad23cd3cadbd9735aff958023239c6a063": {
 				name: "(PoS) Dai Stablecoin", // (PoS) Dai Stablecoin
+				version: "1",
+				chainId: "137"
+			},
+			// WETH
+			"0x7ceb23fd6bc0add59e62ac25578270cff1b9f619" : {
+				name: "Wrapped Ether", // (PoS) Dai Stablecoin
 				version: "1",
 				chainId: "137"
 			}
