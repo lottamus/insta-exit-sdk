@@ -349,7 +349,7 @@ class Hyphen {
                                     data,
                                     to: tokenAddress,
                                     from: userAddress,
-                                    value: '0'
+                                    value: '0x0'
                                 };
                                 return this._sendTransaction(provider, txParams);
                             } else {
@@ -390,7 +390,7 @@ class Hyphen {
                                     data,
                                     to: tokenAddress,
                                     from: userAddress,
-                                    value: '0'
+                                    value: '0x0'
                                 };
                                 return this._sendTransaction(provider, txParams);
                             } else {
