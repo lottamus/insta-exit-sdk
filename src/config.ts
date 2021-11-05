@@ -21,6 +21,18 @@ const tokensMap = {
             transferOverhead: 107848,
             decimal: 18,
             symbol: "USDT"
+		},
+		4: {
+            address: "0xfab46e002bbf0b4509813474841e0716e6730136",
+            transferOverhead: 86147,
+            decimal: 18,
+            symbol: "USDT"
+        },
+        43113: {
+            address: "0xb4e0f6fef81bdfea0856bb846789985c9cff7e85",
+            transferOverhead: 107848,
+            decimal: 18,
+            symbol: "USDT"
         },
         137: {
             address: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
@@ -124,7 +136,9 @@ const tokenAddressMap = {
     "0x64ef393b6846114bad71e2cb2ccc3e10736b5716" : {5 : tokensMap.USDT[5]},
     "0xeabc4b91d9375796aa4f69cc764a4ab509080a58" : {80001 : tokensMap.USDT[80001]},
     "0xdac17f958d2ee523a2206206994597c13d831ec7" : {1 : tokensMap.USDT[1]},
-    "0xc2132d05d31c914a87c6611c10748aeb04b58e8f" : {137 : tokensMap.USDT[137]},
+	"0xc2132d05d31c914a87c6611c10748aeb04b58e8f" : {137 : tokensMap.USDT[137]},
+	"0xfab46e002bbf0b4509813474841e0716e6730136" : {4 : tokensMap.USDT[4]},
+    "0xb4e0f6fef81bdfea0856bb846789985c9cff7e85" : {43113 : tokensMap.USDT[43113]},
 
     "0xb5b640e6414b6def4fc9b3c1eef373925effeccf" : {5 : tokensMap.USDC[5]},
     "0xda5289fcaaf71d52a80a254da614a192b693e977" : {80001 : tokensMap.USDC[80001]},
@@ -140,6 +154,8 @@ const tokenAddressMap = {
 const defaultSupportedTokens: Map<number, SupportedToken[]> = new Map();
 const erc20ABIByNetworkId: Map<number, object> = new Map();
 erc20ABIByNetworkId.set(5, ERC20_ABI);
+erc20ABIByNetworkId.set(4, ERC20_ABI);
+erc20ABIByNetworkId.set(43113, ERC20_ABI);
 erc20ABIByNetworkId.set(1, ERC20_ABI);
 erc20ABIByNetworkId.set(80001, CUSTOM_META_TXN_ENABLED_ERC20_ABI);
 erc20ABIByNetworkId.set(137, CUSTOM_META_TXN_ENABLED_ERC20_ABI);
@@ -166,6 +182,22 @@ defaultSupportedTokens.set(80001, [
 		"decimal": 18,
 		"address": "0x27a44456bedb94dbd59d0f0a14fe977c777fc5c3"
 	}
+]);
+
+defaultSupportedTokens.set(4, [
+	{
+		"tokenSymbol": "USDT",
+		"decimal": 18,
+		"address": "0xfab46e002bbf0b4509813474841e0716e6730136"
+	},
+]);
+
+defaultSupportedTokens.set(43113, [
+	{
+		"tokenSymbol": "USDT",
+		"decimal": 18,
+		"address": "0xb4e0f6fef81bdfea0856bb846789985c9cff7e85"
+	},
 ]);
 
 // Set Polygon Network Default Supported Tokens
@@ -230,7 +262,7 @@ defaultSupportedTokens.set(
 
 const config = {
 	hyphenBaseUrl: {
-		"test": "https://hyphen-test-api.biconomy.io",
+		"test": "http://localhost:3000",
 		"staging": "https://hyphen-staging-api.biconomy.io",
 		"prod": "https://hyphen-api.biconomy.io"
 	},
@@ -314,7 +346,8 @@ const config = {
 		}
 	},
 	defaultSupportedTokens,
-	supportedNetworkIds: [5, 80001, 1, 137],
+	// supportedNetworkIds: [5, 80001, 1, 137],
+	supportedNetworkIds: [5, 80001, 1, 137, 4, 43113],
 	defaultExitCheckInterval: 5000,
 	maxDepositCheckCallbackCount: 720,
 	tokenAddressMap,
