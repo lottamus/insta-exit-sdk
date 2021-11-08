@@ -346,7 +346,6 @@ const config = {
 		}
 	},
 	defaultSupportedTokens,
-	// supportedNetworkIds: [5, 80001, 1, 137],
 	supportedNetworkIds: [5, 80001, 1, 137, 4, 43113],
 	defaultExitCheckInterval: 5000,
 	maxDepositCheckCallbackCount: 720,
