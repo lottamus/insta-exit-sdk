@@ -12,37 +12,43 @@ const tokensMap = {
     "USDT" : {
         80001: {
             address: "0xeabc4b91d9375796aa4f69cc764a4ab509080a58",
-            transferOverhead: 86147,
+            transferOverhead: 61345,
             decimal: 18,
             symbol: "USDT"
         },
         5: {
             address: "0x64ef393b6846114bad71e2cb2ccc3e10736b5716",
-            transferOverhead: 107848,
+            transferOverhead: 61345,
             decimal: 18,
             symbol: "USDT"
 		},
 		4: {
             address: "0xfab46e002bbf0b4509813474841e0716e6730136",
-            transferOverhead: 86147,
+            transferOverhead: 61345,
             decimal: 18,
             symbol: "USDT"
         },
         43113: {
             address: "0xb4e0f6fef81bdfea0856bb846789985c9cff7e85",
-            transferOverhead: 107848,
+            transferOverhead: 61345,
             decimal: 18,
+            symbol: "USDT"
+		},
+		43114: {
+            address: "0xc7198437980c041c805a1edcba50c1ce5db95118",
+            transferOverhead: 61345,
+            decimal: 6,
             symbol: "USDT"
         },
         137: {
             address: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
-            transferOverhead: 107848,
+            transferOverhead: 61345,
             decimal: 6,
             symbol: "USDT"
         },
         1: {
             address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-            transferOverhead: 107848,
+            transferOverhead: 61345,
             decimal: 6,
             symbol: "USDT"
         }
@@ -50,13 +56,13 @@ const tokensMap = {
     "USDC" : {
         80001: {
             address: "0xda5289fcaaf71d52a80a254da614a192b693e977",
-            transferOverhead: 86099,
+            transferOverhead: 64302,
             decimal: 6,
             symbol: "USDC"
         },
         5: {
             address: "0xb5b640e6414b6def4fc9b3c1eef373925effeccf",
-            transferOverhead: 102494,
+            transferOverhead: 64302,
             decimal: 6,
             symbol: "USDC",
 			name: "USDC",
@@ -64,14 +70,22 @@ const tokensMap = {
         },
         137: {
             address: "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
-            transferOverhead: 102494,
+            transferOverhead: 64302,
             decimal: 6,
             symbol: "USDC",
 			name: "USD Coin (PoS)"
         },
         1: {
             address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-            transferOverhead: 102494,
+            transferOverhead: 64302,
+            decimal: 6,
+            symbol: "USDC",
+			name: "USD Coin",
+			version: "2"
+		},
+		43114: {
+            address: "0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664",
+            transferOverhead: 64302,
             decimal: 6,
             symbol: "USDC",
 			name: "USD Coin",
@@ -107,25 +121,31 @@ const tokensMap = {
 	"ETH" : {
         80001: {
             address: "0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa",
-            transferOverhead: 29766,
+            transferOverhead: 40850,
             decimal: 18,
             symbol: "ETH"
         },
         5: {
             address: NATIVE_ADDRESS,
-            transferOverhead: 29766,
+            transferOverhead: 40850,
             decimal: 18,
             symbol: "ETH"
         },
         137: {
             address: "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
-            transferOverhead: 29766,
+            transferOverhead: 40850,
             decimal: 18,
             symbol: "ETH"
         },
         1: {
             address: NATIVE_ADDRESS,
-            transferOverhead: 29766,
+            transferOverhead: 40850,
+            decimal: 18,
+            symbol: "ETH"
+		},
+		43114: {
+            address: "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB",
+            transferOverhead: 40850,
             decimal: 18,
             symbol: "ETH"
         }
@@ -138,12 +158,14 @@ const tokenAddressMap = {
     "0xdac17f958d2ee523a2206206994597c13d831ec7" : {1 : tokensMap.USDT[1]},
 	"0xc2132d05d31c914a87c6611c10748aeb04b58e8f" : {137 : tokensMap.USDT[137]},
 	"0xfab46e002bbf0b4509813474841e0716e6730136" : {4 : tokensMap.USDT[4]},
-    "0xb4e0f6fef81bdfea0856bb846789985c9cff7e85" : {43113 : tokensMap.USDT[43113]},
+	"0xb4e0f6fef81bdfea0856bb846789985c9cff7e85" : {43113 : tokensMap.USDT[43113]},
+	"0xc7198437980c041c805a1edcba50c1ce5db95118" : {43114 : tokensMap.USDT[43114]},
 
     "0xb5b640e6414b6def4fc9b3c1eef373925effeccf" : {5 : tokensMap.USDC[5]},
     "0xda5289fcaaf71d52a80a254da614a192b693e977" : {80001 : tokensMap.USDC[80001]},
     "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" : {1 : tokensMap.USDC[1]},
-    "0x2791bca1f2de4661ed88a30c99a7a9449aa84174" : {137 : tokensMap.USDC[137]},
+	"0x2791bca1f2de4661ed88a30c99a7a9449aa84174" : {137 : tokensMap.USDC[137]},
+	"0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664" : {43114 : tokensMap.USDT[43114]},
 
     "0x2686eca13186766760a0347ee8eeb5a88710e11b" : {5 : tokensMap.DAI[5]},
     "0x27a44456bEDb94DbD59D0f0A14fE977c777fC5C3" : {80001 : tokensMap.DAI[80001]},
@@ -156,6 +178,7 @@ const erc20ABIByNetworkId: Map<number, object> = new Map();
 erc20ABIByNetworkId.set(5, ERC20_ABI);
 erc20ABIByNetworkId.set(4, ERC20_ABI);
 erc20ABIByNetworkId.set(43113, ERC20_ABI);
+erc20ABIByNetworkId.set(43114, ERC20_ABI);
 erc20ABIByNetworkId.set(1, ERC20_ABI);
 erc20ABIByNetworkId.set(80001, CUSTOM_META_TXN_ENABLED_ERC20_ABI);
 erc20ABIByNetworkId.set(137, CUSTOM_META_TXN_ENABLED_ERC20_ABI);
@@ -197,6 +220,19 @@ defaultSupportedTokens.set(43113, [
 		"tokenSymbol": "USDT",
 		"decimal": 18,
 		"address": "0xb4e0f6fef81bdfea0856bb846789985c9cff7e85"
+	},
+]);
+
+defaultSupportedTokens.set(43114, [
+	{
+		"tokenSymbol": "USDT",
+		"decimal": 6,
+		"address": "0xc7198437980c041c805a1edcba50c1ce5db95118"
+	},
+	{
+		"tokenSymbol": "USDC",
+		"decimal": 6,
+		"address": "0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664"
 	},
 ]);
 
@@ -310,7 +346,6 @@ const config = {
 				chainId: "80001"
 			}
 		},
-
 		137: {
 			// USDT
 			"0xc2132d05d31c914a87c6611c10748aeb04b58e8f": {
@@ -346,7 +381,7 @@ const config = {
 		}
 	},
 	defaultSupportedTokens,
-	supportedNetworkIds: [5, 80001, 1, 137, 4, 43113],
+	supportedNetworkIds: [5, 80001, 1, 137, 4, 43113, 43114],
 	defaultExitCheckInterval: 5000,
 	maxDepositCheckCallbackCount: 720,
 	tokenAddressMap,
