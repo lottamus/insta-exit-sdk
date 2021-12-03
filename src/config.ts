@@ -143,6 +143,18 @@ const tokensMap = {
             decimal: 18,
             symbol: "ETH"
 		},
+		4: {
+            address: NATIVE_ADDRESS,
+            transferOverhead: 40850,
+            decimal: 18,
+            symbol: "ETH"
+        },
+        43113: {
+            address: "0x7fcdc2c1ef3e4a0bcc8155a558bb20a7218f2b05",
+            transferOverhead: 40850,
+            decimal: 18,
+            symbol: "ETH"
+		},
 		43114: {
             address: "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB",
             transferOverhead: 40850,
