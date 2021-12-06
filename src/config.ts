@@ -156,7 +156,7 @@ const tokensMap = {
 			symbol: "ETH"
 		},
 		43114: {
-			address: "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB",
+			address: "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab",
 			transferOverhead: 29766,
 			decimal: 18,
 			symbol: "ETH"
@@ -199,9 +199,11 @@ const erc20ABIByToken: Map<string, object> = new Map();
 erc20ABIByToken.set(tokensMap.USDC[5].address, EIP2612_ABI);
 erc20ABIByToken.set(tokensMap.USDC[1].address, EIP2612_ABI);
 erc20ABIByToken.set(tokensMap.USDC[137].address, EIP2612_ABI);
+erc20ABIByToken.set(tokensMap.USDC[43114].address, EIP2612_ABI);
 
 // Set Mumbai Network Default Supported Tokens
-defaultSupportedTokens.set(80001, [
+defaultSupportedTokens.set(80001,
+	[
 	{
 		"tokenSymbol": "USDT",
 		"decimal": 18,
@@ -245,6 +247,11 @@ defaultSupportedTokens.set(43114, [
 		"tokenSymbol": "USDC",
 		"decimal": 6,
 		"address": "0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664"
+	},
+	{
+		"tokenSymbol": "ETH",
+		"decimal": 6,
+		"address": "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab"
 	},
 ]);
 
@@ -327,7 +334,8 @@ const config = {
 
 	customMetaTxnSupportedNetworksForERC20Tokens: {
 		80001: [tokensMap.USDC[80001].address, tokensMap.USDT[80001].address, tokensMap.DAI[80001].address, tokensMap.ETH[80001].address],
-		137: [tokensMap.USDC[137].address, tokensMap.USDT[137].address, tokensMap.DAI[137].address, tokensMap.ETH[137].address]
+		137: [tokensMap.USDC[137].address, tokensMap.USDT[137].address, tokensMap.DAI[137].address, tokensMap.ETH[137].address],
+		43114: [tokensMap.USDC[43114].address, tokensMap.USDT[43114].address, tokensMap.ETH[43114].address]
 	},
 	erc20MetaTxnDomainType: ERC20_META_TXN_DOMAIN_TYPE,
 	customMetaTxnType: CUSTOM_META_TXN_TYPE,
@@ -382,6 +390,26 @@ const config = {
 				name: "Wrapped Ether", // (PoS) Dai Stablecoin
 				version: "1",
 				chainId: "137"
+			}
+		},
+		43114: {
+			// USDT
+			"0xc7198437980c041c805a1edcba50c1ce5db95118": {
+				name: "(PoS) Tether USD", // (PoS) Tether USD
+				version: "1",
+				chainId: "43114"
+			},
+			// USDC
+			"0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664": {
+				name: "USD Coin (PoS)", // USD Coin (PoS)
+				version: "1",
+				chainId: "43114"
+			},
+			// WETH
+			"0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab": {
+				name: "Wrapped Ether", // (PoS) Dai Stablecoin
+				version: "1",
+				chainId: "43114"
 			}
 		},
 		1: {
