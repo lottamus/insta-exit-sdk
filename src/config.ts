@@ -58,7 +58,8 @@ const tokensMap = {
 			address: "0xda5289fcaaf71d52a80a254da614a192b693e977",
 			transferOverhead: 86099,
 			decimal: 6,
-			symbol: "USDC"
+			symbol: "USDC",
+			permitSupported: true
 		},
 		5: {
 			address: "0xb5b640e6414b6def4fc9b3c1eef373925effeccf",
@@ -66,14 +67,16 @@ const tokensMap = {
 			decimal: 6,
 			symbol: "USDC",
 			name: "USDC",
-			version: "1"
+			version: "1",
+			permitSupported: true
 		},
 		137: {
 			address: "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
 			transferOverhead: 86099,
 			decimal: 6,
 			symbol: "USDC",
-			name: "USD Coin (PoS)"
+			name: "USD Coin (PoS)",
+			permitSupported: true
 		},
 		1: {
 			address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
@@ -81,7 +84,8 @@ const tokensMap = {
 			decimal: 6,
 			symbol: "USDC",
 			name: "USD Coin",
-			version: "2"
+			version: "2",
+			permitSupported: true
 		},
 		43114: {
 			address: "0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664",
@@ -89,7 +93,8 @@ const tokensMap = {
 			decimal: 6,
 			symbol: "USDC",
 			name: "USD Coin",
-			version: "2"
+			version: "2",
+			permitSupported: false
 		}
 	},
 	"DAI": {
@@ -177,7 +182,7 @@ const tokenAddressMap = {
 	"0xda5289fcaaf71d52a80a254da614a192b693e977": { 80001: tokensMap.USDC[80001] },
 	"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": { 1: tokensMap.USDC[1] },
 	"0x2791bca1f2de4661ed88a30c99a7a9449aa84174": { 137: tokensMap.USDC[137] },
-	"0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664": { 43114: tokensMap.USDT[43114] },
+	"0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664": { 43114: tokensMap.USDC[43114] },
 
 	"0x2686eca13186766760a0347ee8eeb5a88710e11b": { 5: tokensMap.DAI[5] },
 	"0x27a44456bEDb94DbD59D0f0A14fE977c777fC5C3": { 80001: tokensMap.DAI[80001] },
@@ -334,8 +339,7 @@ const config = {
 
 	customMetaTxnSupportedNetworksForERC20Tokens: {
 		80001: [tokensMap.USDC[80001].address, tokensMap.USDT[80001].address, tokensMap.DAI[80001].address, tokensMap.ETH[80001].address],
-		137: [tokensMap.USDC[137].address, tokensMap.USDT[137].address, tokensMap.DAI[137].address, tokensMap.ETH[137].address],
-		43114: [tokensMap.USDC[43114].address, tokensMap.USDT[43114].address, tokensMap.ETH[43114].address]
+		137: [tokensMap.USDC[137].address, tokensMap.USDT[137].address, tokensMap.DAI[137].address, tokensMap.ETH[137].address]
 	},
 	erc20MetaTxnDomainType: ERC20_META_TXN_DOMAIN_TYPE,
 	customMetaTxnType: CUSTOM_META_TXN_TYPE,

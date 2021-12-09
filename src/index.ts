@@ -355,7 +355,7 @@ class Hyphen {
                             } else {
                                 throw new Error("Couldn't get a provider to get user signature. Make sure you have passed correct provider or walletProvider field in Hyphen constructor.");
                             }
-                        } else if(tokenInfo && tokenInfo.symbol === 'USDC') {
+                        } else if(tokenInfo && tokenInfo.symbol === 'USDC' && tokenInfo.permitSupported) {
                             // If token is USDC call permit method
                             const deadline:number = Number(Math.floor(Date.now() / 1000 + 3600));
                             const usdcDomainData = {
