@@ -475,7 +475,7 @@ class Hyphen {
             if(isNativeAddress(request.tokenAddress)) {
                 const { data } = await lpManager.populateTransaction.depositNative(request.receiver, request.toChainId);
                 txData = data;
-                value = ethers.BigNumber.from(request.amount).toHexString();
+                value = ethers.utils.hexValue(ethers.BigNumber.from(request.amount));
             } else {
                 const { data } = await lpManager.populateTransaction.depositErc20(request.tokenAddress, request.receiver,
                     request.amount, request.toChainId);
