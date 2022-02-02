@@ -50,34 +50,39 @@ const tokensMap: Record<string, Record<number, any>> = {
 		80001: {
 			address: "0xda5289fcaaf71d52a80a254da614a192b693e977",
 			decimal: 6,
-			symbol: "USDC"
+			symbol: "USDC",
+			permitSupported: true
 		},
 		5: {
 			address: "0xb5b640e6414b6def4fc9b3c1eef373925effeccf",
 			decimal: 6,
 			symbol: "USDC",
 			name: "USDC",
-			version: "1"
+			version: "1",
+			permitSupported: true
 		},
 		137: {
 			address: "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
 			decimal: 6,
 			symbol: "USDC",
-			name: "USD Coin (PoS)"
+			name: "USD Coin (PoS)",
+			permitSupported: true
 		},
 		1: {
 			address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
 			decimal: 6,
 			symbol: "USDC",
 			name: "USD Coin",
-			version: "2"
+			version: "2",
+			permitSupported: true
 		},
 		43114: {
 			address: "0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664",
 			decimal: 6,
 			symbol: "USDC",
 			name: "USD Coin",
-			version: "2"
+			version: "2",
+			permitSupported: false
 		}
 	},
 	"DAI": {
@@ -174,7 +179,7 @@ const tokensMap: Record<string, Record<number, any>> = {
  * 		}
  * }
  */
-const tokenAddressMap: Record<string, Record<number, any>> = {}
+const tokenAddressMap: Record<string, Record<number, any>> = {};
 for(const [_, val] of Object.entries(tokensMap)) {
 	for(const [chainId, data] of Object.entries(val)) {
 		tokenAddressMap[data.address] = {
@@ -332,8 +337,7 @@ const config = {
 
 	customMetaTxnSupportedNetworksForERC20Tokens: {
 		80001: [tokensMap.USDC[80001].address, tokensMap.USDT[80001].address, tokensMap.DAI[80001].address, tokensMap.ETH[80001].address],
-		137: [tokensMap.USDC[137].address, tokensMap.USDT[137].address, tokensMap.DAI[137].address, tokensMap.ETH[137].address],
-		43114: [tokensMap.USDC[43114].address, tokensMap.USDT[43114].address, tokensMap.ETH[43114].address]
+		137: [tokensMap.USDC[137].address, tokensMap.USDT[137].address, tokensMap.DAI[137].address, tokensMap.ETH[137].address]
 	},
 	erc20MetaTxnDomainType: ERC20_META_TXN_DOMAIN_TYPE,
 	customMetaTxnType: CUSTOM_META_TXN_TYPE,
