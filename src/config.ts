@@ -8,47 +8,40 @@ const CUSTOM_META_TXN_TYPE = [{ name: "nonce", type: "uint256" }, { name: "from"
 
 const NATIVE_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 
-const tokensMap = {
+const tokensMap: Record<string, Record<number, any>> = {
 	"USDT": {
 		80001: {
 			address: "0xeabc4b91d9375796aa4f69cc764a4ab509080a58",
-			transferOverhead: 86147,
 			decimal: 18,
 			symbol: "USDT"
 		},
 		5: {
 			address: "0x64ef393b6846114bad71e2cb2ccc3e10736b5716",
-			transferOverhead: 86147,
 			decimal: 18,
 			symbol: "USDT"
 		},
 		4: {
 			address: "0xfab46e002bbf0b4509813474841e0716e6730136",
-			transferOverhead: 86147,
 			decimal: 18,
 			symbol: "USDT"
 		},
 		43113: {
 			address: "0xb4e0f6fef81bdfea0856bb846789985c9cff7e85",
-			transferOverhead: 86147,
 			decimal: 18,
 			symbol: "USDT"
 		},
 		43114: {
 			address: "0xc7198437980c041c805a1edcba50c1ce5db95118",
-			transferOverhead: 86147,
 			decimal: 6,
 			symbol: "USDT"
 		},
 		137: {
 			address: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
-			transferOverhead: 86147,
 			decimal: 6,
 			symbol: "USDT"
 		},
 		1: {
 			address: "0xdac17f958d2ee523a2206206994597c13d831ec7",
-			transferOverhead: 86147,
 			decimal: 6,
 			symbol: "USDT"
 		}
@@ -56,14 +49,12 @@ const tokensMap = {
 	"USDC": {
 		80001: {
 			address: "0xda5289fcaaf71d52a80a254da614a192b693e977",
-			transferOverhead: 86099,
 			decimal: 6,
 			symbol: "USDC",
 			permitSupported: true
 		},
 		5: {
 			address: "0xb5b640e6414b6def4fc9b3c1eef373925effeccf",
-			transferOverhead: 86099,
 			decimal: 6,
 			symbol: "USDC",
 			name: "USDC",
@@ -72,7 +63,6 @@ const tokensMap = {
 		},
 		137: {
 			address: "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
-			transferOverhead: 86099,
 			decimal: 6,
 			symbol: "USDC",
 			name: "USD Coin (PoS)",
@@ -80,7 +70,6 @@ const tokensMap = {
 		},
 		1: {
 			address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-			transferOverhead: 86099,
 			decimal: 6,
 			symbol: "USDC",
 			name: "USD Coin",
@@ -89,7 +78,6 @@ const tokensMap = {
 		},
 		43114: {
 			address: "0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664",
-			transferOverhead: 86099,
 			decimal: 6,
 			symbol: "USDC",
 			name: "USD Coin",
@@ -100,25 +88,21 @@ const tokensMap = {
 	"DAI": {
 		80001: {
 			address: "0x27a44456bedb94dbd59d0f0a14fe977c777fc5c3",
-			transferOverhead: 86147,
 			decimal: 18,
 			symbol: "DAI"
 		},
 		5: {
 			address: "0x2686eca13186766760a0347ee8eeb5a88710e11b",
-			transferOverhead: 96061,
 			decimal: 18,
 			symbol: "DAI"
 		},
 		137: {
 			address: "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
-			transferOverhead: 96061,
 			decimal: 18,
 			symbol: "DAI"
 		},
 		1: {
 			address: "0x6b175474e89094c44da98b954eedeac495271d0f",
-			transferOverhead: 96061,
 			decimal: 18,
 			symbol: "DAI"
 		}
@@ -126,68 +110,82 @@ const tokensMap = {
 	"ETH": {
 		80001: {
 			address: "0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa",
-			transferOverhead: 29766,
 			decimal: 18,
 			symbol: "ETH"
 		},
 		5: {
 			address: NATIVE_ADDRESS,
-			transferOverhead: 29766,
 			decimal: 18,
 			symbol: "ETH"
 		},
 		137: {
 			address: "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
-			transferOverhead: 29766,
 			decimal: 18,
 			symbol: "ETH"
 		},
 		1: {
 			address: NATIVE_ADDRESS,
-			transferOverhead: 29766,
 			decimal: 18,
 			symbol: "ETH"
 		},
 		4: {
 			address: NATIVE_ADDRESS,
-			transferOverhead: 29766,
 			decimal: 18,
 			symbol: "ETH"
 		},
 		43113: {
 			address: "0x7fcdc2c1ef3e4a0bcc8155a558bb20a7218f2b05",
-			transferOverhead: 29766,
 			decimal: 18,
 			symbol: "ETH"
 		},
 		43114: {
 			address: "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab",
-			transferOverhead: 29766,
 			decimal: 18,
 			symbol: "ETH"
+		}
+	},
+	"BICO": {
+		80001: {
+			address: "0x91c89A94567980f0e9723b487b0beD586eE96aa7",
+			decimal: 18,
+			symbol: "BICO"
+		},
+		5: {
+			address: "0xDdc47b0cA071682e8dc373391aCA18dA0Fe28699",
+			decimal: 18,
+			symbol: "BICO"
+		},
+		1: {
+			address: "0xf17e65822b568b3903685a7c9f496cf7656cc6c2",
+			decimal: 18,
+			symbol: "BICO"
+		},
+		137: {
+			address: "0x91c89A94567980f0e9723b487b0beD586eE96aa7",	
+			decimal: 18,
+			symbol: "BICO"
 		}
 	}
 };
 
-const tokenAddressMap = {
-	"0x64ef393b6846114bad71e2cb2ccc3e10736b5716": { 5: tokensMap.USDT[5] },
-	"0xeabc4b91d9375796aa4f69cc764a4ab509080a58": { 80001: tokensMap.USDT[80001] },
-	"0xdac17f958d2ee523a2206206994597c13d831ec7": { 1: tokensMap.USDT[1] },
-	"0xc2132d05d31c914a87c6611c10748aeb04b58e8f": { 137: tokensMap.USDT[137] },
-	"0xfab46e002bbf0b4509813474841e0716e6730136": { 4: tokensMap.USDT[4] },
-	"0xb4e0f6fef81bdfea0856bb846789985c9cff7e85": { 43113: tokensMap.USDT[43113] },
-	"0xc7198437980c041c805a1edcba50c1ce5db95118": { 43114: tokensMap.USDT[43114] },
-
-	"0xb5b640e6414b6def4fc9b3c1eef373925effeccf": { 5: tokensMap.USDC[5] },
-	"0xda5289fcaaf71d52a80a254da614a192b693e977": { 80001: tokensMap.USDC[80001] },
-	"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": { 1: tokensMap.USDC[1] },
-	"0x2791bca1f2de4661ed88a30c99a7a9449aa84174": { 137: tokensMap.USDC[137] },
-	"0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664": { 43114: tokensMap.USDC[43114] },
-
-	"0x2686eca13186766760a0347ee8eeb5a88710e11b": { 5: tokensMap.DAI[5] },
-	"0x27a44456bEDb94DbD59D0f0A14fE977c777fC5C3": { 80001: tokensMap.DAI[80001] },
-	"0x6b175474e89094c44da98b954eedeac495271d0f": { 1: tokensMap.DAI[1] },
-	"0x8f3cf7ad23cd3cadbd9735aff958023239c6a063": { 137: tokensMap.DAI[137] },
+/**
+ * {
+ * 		address: {
+ * 			chainId: {
+ * 				address
+ * 				decimal
+ * 				symbol
+ * 			}
+ * 		}
+ * }
+ */
+const tokenAddressMap: Record<string, Record<number, any>> = {};
+for(const [_, val] of Object.entries(tokensMap)) {
+	for(const [chainId, data] of Object.entries(val)) {
+		tokenAddressMap[data.address] = {
+			[chainId]: data
+		}
+	}
 }
 
 const defaultSupportedTokens: Map<number, SupportedToken[]> = new Map();

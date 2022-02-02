@@ -494,7 +494,7 @@ class Hyphen {
 
             return this._sendTransaction(provider, txParams);
         } catch(error) {
-            this._logMessage(error);
+            this._logMessage(error as object);
         }
     }
 
