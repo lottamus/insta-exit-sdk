@@ -532,4 +532,4 @@ class Hyphen {
     }
 }
 
-module.exports = { Hyphen, RESPONSE_CODES, SIGNATURE_TYPES }
+export { Hyphen, RESPONSE_CODES, SIGNATURE_TYPES }

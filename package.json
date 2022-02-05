@@ -29,7 +29,8 @@
   "files": [
     "*.js",
     "/dist/meta-transaction/*.js",
-    "/dist/*.js"
+    "/dist/*.js",
+    "/dist/**/*.d.ts"
   ],
   "dependencies": {
     "@biconomy/mexa": "^2.0.24",
