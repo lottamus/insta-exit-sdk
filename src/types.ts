@@ -1,5 +1,6 @@
 import { Contract } from "@ethersproject/contracts"
 import { ethers } from "ethers"
+import { config } from "./config"
 
 export type Config = {
     hyphenBaseUrl: object,
@@ -39,7 +40,7 @@ export type SupportedToken = {
 export type Options = {
     defaultAccount: string,
     debug: boolean,
-    environment: string,
+    environment: keyof typeof config.hyphenBaseUrl,
     signatureType: string,
     infiniteApproval: boolean,
     exitCheckInterval: number, // Interval in milli seconds to check for exit status
@@ -105,7 +106,7 @@ export type DepositRequest = {
 
 export type ERC20ApproveRequest = {
     contract: Contract,
-    abi: object,
+    abi: ethers.ContractInterface,
     domainType: object,
     metaTransactionType: object,
     userAddress: string,
