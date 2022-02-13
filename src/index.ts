@@ -222,7 +222,8 @@ class Hyphen {
     }
 
     listenForExitTransaction = async (transaction: TransactionResponse, fromChainId: number) => {
-        if(this.options.onFundsTransfered) {
+        const onFundsTransfered = this.options.onFundsTransfered;
+        if (onFundsTransfered) {
             const interval = this.options.exitCheckInterval || config.defaultExitCheckInterval;
             await transaction.wait(1);
             this._logMessage(`Deposit transaction Confirmed. Listening for exit transaction now`);
@@ -233,11 +234,11 @@ class Hyphen {
                 invocationCount++;
                 if(response && response.code === RESPONSE_CODES.SUCCESS) {
                     if(response.statusCode === EXIT_STATUS.PROCESSED && response.exitHash) {
-                        this.options.onFundsTransfered(response);
+                        onFundsTransfered(response);
                         clearInterval(this.depositTransactionListenerMap.get(depositHash))
                         this.depositTransactionListenerMap.delete(depositHash);
                     } else if(response.exitHash) {
-                        this.options.onFundsTransfered(response);
+                        onFundsTransfered(response);
                     }
                 }
                 if(invocationCount >= config.maxDepositCheckCallbackCount) {
