@@ -1,6 +1,6 @@
 {
   "name": "@biconomy/hyphen",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "Hyphen SDK to enable instant and seamless cross-chain deposits & withdrawals",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -29,7 +29,8 @@
   "files": [
     "*.js",
     "/dist/meta-transaction/*.js",
-    "/dist/*.js"
+    "/dist/*.js",
+    "/dist/**/*.d.ts"
   ],
   "dependencies": {
     "@biconomy/mexa": "^2.0.24",

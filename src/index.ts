@@ -1,11 +1,10 @@
 import { BigNumber, ethers } from "ethers";
-import { EXIT_STATUS, SIGNATURE_TYPES } from "./config";
+import { config, RESPONSE_CODES, EXIT_STATUS, SIGNATURE_TYPES } from "./config";
 import { CheckDepositStatusRequest, CheckStatusRequest, CheckStatusResponse,
     DepositRequest, FetchOption, InternalBiconomyOption, ManualExitResponse, Options, SupportedToken, Transaction, TransactionResponse } from "./types";
 import { getERC20ApproveDataToSign, getMetaTxnCompatibleTokenData, getSignatureParameters } from './meta-transaction/util';
 import { isEthersProvider, isNativeAddress } from './util';
 
-const { config, RESPONSE_CODES } = require('./config');
 const { Biconomy } = require("@biconomy/mexa");
 
 class Hyphen {
@@ -223,7 +222,8 @@ class Hyphen {
     }
 
     listenForExitTransaction = async (transaction: TransactionResponse, fromChainId: number) => {
-        if(this.options.onFundsTransfered) {
+        const onFundsTransfered = this.options.onFundsTransfered;
+        if (onFundsTransfered) {
             const interval = this.options.exitCheckInterval || config.defaultExitCheckInterval;
             await transaction.wait(1);
             this._logMessage(`Deposit transaction Confirmed. Listening for exit transaction now`);
@@ -234,11 +234,11 @@ class Hyphen {
                 invocationCount++;
                 if(response && response.code === RESPONSE_CODES.SUCCESS) {
                     if(response.statusCode === EXIT_STATUS.PROCESSED && response.exitHash) {
-                        this.options.onFundsTransfered(response);
+                        onFundsTransfered(response);
                         clearInterval(this.depositTransactionListenerMap.get(depositHash))
                         this.depositTransactionListenerMap.delete(depositHash);
                     } else if(response.exitHash) {
-                        this.options.onFundsTransfered(response);
+                        onFundsTransfered(response);
                     }
                 }
                 if(invocationCount >= config.maxDepositCheckCallbackCount) {
@@ -310,7 +310,7 @@ class Hyphen {
             }
 
             const tokenContract = new ethers.Contract(tokenAddress, erc20ABI, provider);
-            const tokenContractInterface = new ethers.utils.Interface(erc20ABI);
+            const tokenContractInterface = new ethers.utils.Interface(JSON.stringify(erc20ABI));
             const tokenInfo = config.tokenAddressMap[tokenAddress.toLowerCase()] ? config.tokenAddressMap[tokenAddress.toLowerCase()][currentNetwork.chainId] : undefined;
             if (tokenContract) {
                 if((infiniteApproval !== undefined && infiniteApproval) || (infiniteApproval === undefined && this.options.infiniteApproval)) {
@@ -320,7 +320,7 @@ class Hyphen {
                 if (spender && approvalAmount) {
                     // check if biconomy enable?
                     if(this.options.biconomy && this.options.biconomy.enable){
-                        const customMetaTxSupport = config.customMetaTxnSupportedNetworksForERC20Tokens[currentNetwork.chainId];
+                        const customMetaTxSupport = config.customMetaTxnSupportedNetworksForERC20Tokens[currentNetwork.chainId as keyof typeof config.customMetaTxnSupportedNetworksForERC20Tokens];
                         if(customMetaTxSupport && customMetaTxSupport.indexOf(tokenAddress.toLowerCase()) > -1) {
                             // Call executeMetaTransaction method
                             const functionSignature = tokenContractInterface.encodeFunctionData("approve", [spender, approvalAmount.toString()]);
@@ -532,4 +532,4 @@ class Hyphen {
     }
 }
 
-module.exports = { Hyphen, RESPONSE_CODES, SIGNATURE_TYPES }
+export { Hyphen, RESPONSE_CODES, SIGNATURE_TYPES }
