@@ -162,7 +162,7 @@ const tokensMap: Record<string, Record<number, any>> = {
 			symbol: "BICO"
 		},
 		137: {
-			address: "0x91c89A94567980f0e9723b487b0beD586eE96aa7",	
+			address: "0x91c89A94567980f0e9723b487b0beD586eE96aa7",
 			decimal: 18,
 			symbol: "BICO"
 		}
